@@ -59,6 +59,7 @@ services:
       # If running locally, http://localhost:5000/api is fine.
       # If running on a server, this should be http://YOUR_SERVER_IP:5000/api
       - PUBLIC_API_URL=http://localhost:5000/api
+    command: npm run preview -- --host
     depends_on:
       - backend
     networks:

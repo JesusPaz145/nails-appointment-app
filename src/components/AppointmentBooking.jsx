@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/booking.css';
 
-const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:5000/api';
+// Dynamically determine API URL based on current host
+const getApiUrl = () => {
+    if (typeof window === 'undefined') return 'http://localhost:5000/api';
+    return `http://${window.location.hostname}:5000/api`;
+};
+
+const API_URL = getApiUrl();
 
 export default function AppointmentBooking() {
     const [step, setStep] = useState(1);

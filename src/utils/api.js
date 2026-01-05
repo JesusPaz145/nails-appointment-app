@@ -1,4 +1,11 @@
-const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:5000/api';
+// Dynamically determine API URL based on current host
+// This allows the app to work on localhost OR a server IP (like 192.168.x.x) automatically
+const getApiUrl = () => {
+    if (typeof window === 'undefined') return 'http://localhost:5000/api'; // Server-side fallback
+    return `http://${window.location.hostname}:5000/api`;
+};
+
+const API_URL = getApiUrl();
 
 // Helper to get token from cookie - actually we are using httpOnly cookies, so we don't need to send it manually.
 // The browser handles it. We just need to ensure credentials: 'include'.

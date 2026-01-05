@@ -11,10 +11,15 @@ services:
       POSTGRES_PASSWORD: ${DB_PASS:-admin123}
       POSTGRES_DB: ${DB_NAME:-nailsbyanais}
     ports:
-      - "5435:5432" # Changed to 5435 to avoid conflict with existing postgres on host
+      - "5435:5432" # Host port 5435
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d nailsbyanais" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   # Backend Service
   backend:
@@ -24,7 +29,7 @@ services:
     environment:
       - DB_USER=${DB_USER:-admin}
       - DB_PASS=${DB_PASS:-admin123}
-      - DB_HOST=db
+      - DB_HOST=nails_db # Use explicit container name
       - DB_PORT=5432
       - DB_NAME=${DB_NAME:-nailsbyanais}
       - JWT_SECRET=${JWT_SECRET:-secretKey123}
@@ -32,9 +37,12 @@ services:
     ports:
       - "5000:5000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - nails_net
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # Allows connection to host machine via host.docker.internal
 
   # Frontend Service
   frontend:

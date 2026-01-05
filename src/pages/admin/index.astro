@@ -1,0 +1,49 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Panel de Administración">
+    <div class="container" style="padding: 4rem 1rem;">
+        <h1 class="text-center" style="color: var(--color-primary); margin-bottom: 2rem;">Panel de Administración</h1>
+
+        <div class="flex justify-center gap-2" style="flex-wrap: wrap;">
+            <a href="/admin/servicios" class="card" style="text-align: center; min-width: 250px; text-decoration: none; color: inherit; transition: transform 0.2s;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">💅</div>
+                <h3>Gestionar Servicios</h3>
+                <p>Añadir, editar o eliminar servicios.</p>
+            </a>
+            
+            <a href="/admin/usuarios" class="card" style="text-align: center; min-width: 250px; text-decoration: none; color: inherit; transition: transform 0.2s;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">👥</div>
+                <h3>Gestionar Usuarios</h3>
+                <p>Ver usuarios y asignar permisos.</p>
+            </a>
+
+            <a href="/admin/citas" class="card" style="text-align: center; min-width: 250px; text-decoration: none; color: inherit; transition: transform 0.2s;">
+                 <div style="font-size: 3rem; margin-bottom: 1rem;">📅</div>
+                <h3>Gestionar Citas</h3>
+                <p>Ver todas las citas agendas.</p>
+            </a>
+        </div>
+    </div>
+</Layout>
+
+<script>
+    import { checkAuth } from '../../utils/auth';
+    
+    // Protect route
+    async function protect() {
+        const user = await checkAuth();
+        if (!user || user.usr_lvl !== 1) {
+            window.location.href = '/';
+        }
+    }
+    protect();
+</script>
+
+<style>
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    }
+</style>

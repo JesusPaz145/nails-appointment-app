@@ -1,0 +1,93 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Gestionar Usuarios">
+    <div class="container" style="padding: 4rem 1rem;">
+        <h1 style="color: var(--color-primary); margin-bottom: 2rem;">Gestionar Usuarios</h1>
+        
+        <div class="overflow-x-auto">
+            <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                <thead style="background: var(--color-primary); color: white;">
+                    <tr>
+                        <th style="padding: 1rem; text-align: left;">ID</th>
+                        <th style="padding: 1rem; text-align: left;">Nombre</th>
+                        <th style="padding: 1rem; text-align: left;">Usuario</th>
+                        <th style="padding: 1rem; text-align: left;">Rol</th>
+                        <th style="padding: 1rem; text-align: left;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="users-list">
+                    <!-- Users injected here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</Layout>
+
+<script>
+    import { api } from '../../utils/api';
+    import { checkAuth } from '../../utils/auth';
+
+    const list = document.getElementById('users-list');
+
+    async function init() {
+        const user = await checkAuth();
+        if (!user || user.usr_lvl !== 1) {
+            window.location.href = '/';
+            return;
+        }
+        loadUsers();
+    }
+
+    async function loadUsers() {
+        if (!list) return;
+        try {
+            const users = await api.get('/usuarios');
+            list.innerHTML = users.map(u => `
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 1rem;">${u.id}</td>
+                    <td style="padding: 1rem;">${u.name}</td>
+                    <td style="padding: 1rem;">${u.user}</td>
+                    <td style="padding: 1rem;">
+                        <span style="padding: 0.25rem 0.75rem; border-radius: 20px; background: ${u.usr_lvl === 1 ? '#E2F0CB' : '#eee'}; color: ${u.usr_lvl === 1 ? '#4A4A4A' : '#666'};">
+                            ${u.usr_lvl === 1 ? 'Administrador' : 'Cliente'}
+                        </span>
+                    </td>
+                    <td style="padding: 1rem;">
+                        ${u.usr_lvl !== 1 ? 
+                            `<button class="btn btn-secondary" onclick="makeAdmin(${u.id})">Hacer Admin</button>` : 
+                            `<button class="btn btn-secondary" onclick="makeClient(${u.id})">Hacer Cliente</button>`
+                        }
+                    </td>
+                </tr>
+            `).join('');
+        } catch (err) {
+            console.error(err);
+            if (list) list.innerHTML = '<tr><td colspan="5" class="text-center p-4">Error cargando usuarios</td></tr>';
+        }
+    }
+
+    (window as any).makeAdmin = async (id) => {
+        if(confirm('¿Hacer administrador a este usuario?')) {
+            updateLevel(id, 1);
+        }
+    };
+
+    (window as any).makeClient = async (id) => {
+        if(confirm('¿Quitar permisos de administrador?')) {
+            updateLevel(id, 2);
+        }
+    };
+
+    async function updateLevel(id, level) {
+        try {
+            await api.put(`/usuarios/${id}/level`, { usr_lvl: level });
+            loadUsers();
+        } catch (err: any) {
+            alert(err.message || 'Error actualizando usuario');
+        }
+    }
+
+    init();
+</script>

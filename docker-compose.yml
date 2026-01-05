@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # Database Service
+  db:
+    image: postgres:15
+    container_name: nails_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-admin}
+      POSTGRES_PASSWORD: ${DB_PASS:-admin123}
+      POSTGRES_DB: ${DB_NAME:-nailsbyanais}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+  # Backend Service
+  backend:
+    build: ./backend
+    container_name: nails_backend
+    restart: always
+    environment:
+      - DB_USER=${DB_USER:-admin}
+      - DB_PASS=${DB_PASS:-admin123}
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-nailsbyanais}
+      - JWT_SECRET=${JWT_SECRET:-secretKey123}
+      - PORT=5000
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    networks:
+      - nails_net
+
+  # Frontend Service
+  frontend:
+    build: .
+    container_name: nails_frontend
+    restart: always
+    ports:
+      - "4321:4321" # Astro default port
+    environment:
+      - HOST=0.0.0.0
+      - PORT=4321
+      # IMPORTANT: For client-side requests to work from the browser,
+      # API_URL must be accessible from the browser machine.
+      # If running locally, http://localhost:5000/api is fine.
+      # If running on a server, this should be http://YOUR_SERVER_IP:5000/api
+      - PUBLIC_API_URL=http://localhost:5000/api 
+    depends_on:
+      - backend
+    networks:
+      - nails_net
+
+volumes:
+  pgdata:
+
+networks:
+  nails_net:
+    driver: bridge

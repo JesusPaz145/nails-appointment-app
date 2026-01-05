@@ -29,7 +29,7 @@ services:
     environment:
       - DB_USER=${DB_USER:-admin}
       - DB_PASS=${DB_PASS:-admin123}
-      - DB_HOST=nails_db # Use explicit container name
+      - DB_HOST=${DB_HOST:-nails_db} # Use variable or default to container name
       - DB_PORT=5432
       - DB_NAME=${DB_NAME:-nailsbyanais}
       - JWT_SECRET=${JWT_SECRET:-secretKey123}

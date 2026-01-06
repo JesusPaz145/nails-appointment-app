@@ -51,16 +51,15 @@ services:
     container_name: nails_frontend
     restart: always
     ports:
-      - "4321:4321" # Astro default port
+      - "4321:80" # Map host 4321 to Nginx 80
     environment:
       - HOST=0.0.0.0
-      - PORT=4321
+      - PORT=80
       # IMPORTANT: For client-side requests to work from the browser,
       # API_URL must be accessible from the browser machine.
       # If running locally, http://localhost:5000/api is fine.
       # If running on a server, this should be http://YOUR_SERVER_IP:5000/api
       - PUBLIC_API_URL=http://localhost:5000/api
-    command: npm run preview
     depends_on:
       - backend
     networks:

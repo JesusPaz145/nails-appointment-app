@@ -1,4 +1,5 @@
-FROM node:18-alpine
+# Stage 1: Build
+FROM node:18-alpine AS builder
 
 WORKDIR /app
 
@@ -11,19 +12,17 @@ RUN npm install
 # Copy source code
 COPY . .
 
-# Build the app (for static generation or SSR if configured)
-# Since we are using basic Astro, 'npm run build' generates static files in dist/
-# But we used 'npm run dev' to develop. 
-# For production, we can serve the 'dist' folder or run in preview mode.
-# 'npm run preview' serves the built files on port 4321.
-
+# Build the app to dist/
 RUN npm run build
 
-# Expose port
-EXPOSE 4321
+# Stage 2: Serve
+FROM nginx:alpine
 
-# Host should be 0.0.0.0 to be accessible outside container
-ENV HOST=0.0.0.0
+# Copy built files from builder stage
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Start the app in preview mode (serves the dist folder)
-CMD ["npm", "run", "preview", "--", "--host"]
+# Expose Nginx default port
+EXPOSE 80
+
+# No need for host env or preview cmd, Nginx handles it
+CMD ["nginx", "-g", "daemon off;"]

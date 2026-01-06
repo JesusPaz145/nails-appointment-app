@@ -142,7 +142,7 @@ const { title } = Astro.props;
         display: flex;
         align-items: center;
     }
-    nav a {
+    nav :global(a) {
         font-weight: 500;
         color: var(--color-text);
         padding: 0.5rem 1rem;
@@ -151,14 +151,14 @@ const { title } = Astro.props;
         display: block;
         text-decoration: none;
     }
-    nav a:hover {
+    nav :global(a:hover) {
         color: var(--color-primary);
     }
-    .nav-btn {
+    :global(.nav-btn) {
         background-color: var(--color-primary);
         color: white !important;
     }
-    .nav-btn:hover {
+    :global(.nav-btn:hover) {
         background-color: #ff9e99;
     }
 
@@ -235,7 +235,7 @@ const { title } = Astro.props;
             border-bottom: 1px solid #f9f9f9;
         }
 
-        nav a {
+        nav :global(a) {
             font-size: 1.25rem; /* Larger font */
             padding: 1.25rem 0.5rem;
             display: block;
@@ -244,19 +244,19 @@ const { title } = Astro.props;
         }
 
         /* Remove desktop hover slide for mobile */
-        nav a:hover {
+        nav :global(a:hover) {
             padding-left: 0.5rem; /* Reset */
             color: var(--color-primary);
             background: #fffafa;
         }
 
-        .nav-btn {
+        :global(.nav-btn) {
             background-color: var(--color-primary);
             color: white !important;
             text-align: center;
             border-radius: 12px;
             margin-top: 1.5rem;
-            padding: 1rem;
+            padding: 1.25rem !important; /* Match nav a padding but slightly more */
             font-weight: 700;
             box-shadow: 0 4px 6px rgba(255, 183, 178, 0.2);
         }

@@ -47,6 +47,7 @@ services:
   # Frontend Service
   frontend:
     build: .
+    image: nails-app-frontend:latest
     container_name: nails_frontend
     restart: always
     ports:

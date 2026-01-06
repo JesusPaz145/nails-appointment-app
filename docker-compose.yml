@@ -1,28 +1,6 @@
 version: '3.8'
 
 services:
-  # Database Service
-  db:
-    image: postgres:15
-    container_name: nails_db
-    restart: always
-    environment:
-      POSTGRES_USER: ${DB_USER:-admin}
-      POSTGRES_PASSWORD: ${DB_PASS:-admin123}
-      POSTGRES_DB: ${DB_NAME:-nailsbyanais}
-    ports:
-      - "5435:5432" # Host port 5435
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U admin -d nailsbyanais" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - nails_net
-
   # Backend Service
   backend:
     build: ./backend
@@ -31,20 +9,16 @@ services:
     environment:
       - DB_USER=${DB_USER:-admin}
       - DB_PASS=${DB_PASS:-admin123}
-      - DB_HOST=db # Use internal container name
+      - DB_HOST=postgres_db # Name of your existing container
       - DB_PORT=5432
       - DB_NAME=${DB_NAME:-nailsbyanais}
       - JWT_SECRET=${JWT_SECRET:-secretKey123}
       - PORT=5000
-    ports:
-      - "5000:5000"
-    depends_on:
-      db:
-        condition: service_healthy
     networks:
       - nails_net
+      - db_network
     extra_hosts:
-      - "host.docker.internal:host-gateway" # Allows connection to host machine via host.docker.internal
+      - "host.docker.internal:host-gateway"
 
   # Frontend Service
   frontend:
@@ -57,20 +31,15 @@ services:
     environment:
       - HOST=0.0.0.0
       - PORT=80
-      # IMPORTANT: For client-side requests to work from the browser,
-      # API_URL must be accessible from the browser machine.
-      # If running locally, http://localhost:5000/api is fine.
-      # If running on a server, this should be http://YOUR_SERVER_IP:5000/api
       - PUBLIC_API_URL=http://localhost:5000/api
     depends_on:
       - backend
     networks:
       - nails_net
 
-volumes:
-  pgdata:
-
-
 networks:
   nails_net:
     driver: bridge
+  db_network:
+    external: true
+    name: postgres_db_default

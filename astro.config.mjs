@@ -13,10 +13,7 @@ export default defineConfig({
     server: {
       allowedHosts: ["nails.yisustech.com", ".yisustech.com"],
       proxy: {
-        '/api': {
-          target: 'http://localhost:5000',
-          changeOrigin: true,
-        }
+        '/api': 'http://localhost:5000'
       }
     }
   }

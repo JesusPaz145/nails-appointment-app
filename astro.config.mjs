@@ -8,10 +8,10 @@ export default defineConfig({
   integrations: [react()],
   vite: {
     preview: {
-      allowedHosts: true,
+      allowedHosts: ["nails.yisustech.com", ".yisustech.com"],
     },
     server: {
-      allowedHosts: true,
+      allowedHosts: ["nails.yisustech.com", ".yisustech.com"],
     }
   }
 });

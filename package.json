@@ -3,6 +3,7 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
+    "start": "astro dev --host 0.0.0.0",
     "dev": "astro dev --host 0.0.0.0",
     "dev:all": "concurrently \"npm run dev\" \"npm run dev --prefix backend\"",
     "build": "astro build",

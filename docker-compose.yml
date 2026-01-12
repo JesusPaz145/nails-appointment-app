@@ -1,74 +1,33 @@
 version: '3.8'
 
 services:
-  # Database Service
-  db:
-    image: postgres:15
-    container_name: nails_db
+  # Web Service (Python app)
+  web:
+    build: .
+    container_name: nails_web
     restart: always
     environment:
-      POSTGRES_USER: ${DB_USER:-admin}
-      POSTGRES_PASSWORD: ${DB_PASS:-admin123}
-      POSTGRES_DB: ${DB_NAME:-nailsbyanais}
-    ports:
-      - "5435:5432" # Host port 5435
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U admin -d nailsbyanais" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  # Backend Service
-  backend:
-    build: ./backend
-    container_name: nails_backend
-    restart: always
-    environment:
+      # Connection to Host Database
+      - DB_HOST=${DB_HOST:-host.docker.internal}
+      - DB_PORT=${DB_PORT:-5432}
+      # Update these if your local DB has different credentials
       - DB_USER=${DB_USER:-admin}
       - DB_PASS=${DB_PASS:-admin123}
-      - DB_HOST=${DB_HOST:-nails_db} # Use variable or default to container name
-      - DB_PORT=${DB_PORT:-5432}
       - DB_NAME=${DB_NAME:-nailsbyanais}
-      - JWT_SECRET=${JWT_SECRET:-secretKey123}
-      - PORT=5000
+
+      - SECRET_KEY=${SECRET_KEY:-supersecretkey}
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=30
     ports:
-      - "5000:5000"
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - nails_net
+      - "8000:8000"
     extra_hosts:
-      - "host.docker.internal:host-gateway" # Allows connection to host machine via host.docker.internal
-
-  # Frontend Service
-  frontend:
-    build: .
-    container_name: nails_frontend
-    restart: always
-    ports:
-      - "4321:4321" # Astro default port
-    environment:
-      - HOST=0.0.0.0
-      - PORT=4321
-      # IMPORTANT: For client-side requests to work from the browser,
-      # API_URL must be accessible from the browser machine.
-      # If running locally, http://localhost:5000/api is fine.
-      # If running on a server, this should be http://YOUR_SERVER_IP:5000/api
-      - PUBLIC_API_URL=http://localhost:5000/api
-    # Use image CMD (serve) to serve built static files; remove preview command
-    # command: npm run preview
-    depends_on:
-      - backend
+      - "host.docker.internal:host-gateway" # Required for Linux to reach host
     networks:
       - nails_net
+    volumes:
+      - ./app:/app/app # Sync code for development
 
-volumes:
-  pgdata:
-
+# Removed 'db' service as user provides their own
 
 networks:
   nails_net:

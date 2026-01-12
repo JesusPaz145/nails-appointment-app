@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="container mx-auto px-4 py-12">
+  <div class="text-center mb-12">
+    <h1 class="text-4xl md:text-5xl font-serif font-bold text-gray-800 mb-4">Nuestros Servicios</h1>
+    <p class="text-gray-500 text-lg max-w-2xl mx-auto">Selecciona el tratamiento perfecto para ti y reserva tu cita al
+      instante.</p>
+  </div>
+
+  <!-- Grid Container -->
+  <div id="servicios-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Loading -->
+    <div class="col-span-full py-12 text-center">
+      <i class="fas fa-circle-notch fa-spin text-4xl text-primary/30"></i>
+      <p class="mt-4 text-gray-500">Cargando servicios...</p>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const grid = document.getElementById('servicios-grid');
+    try {
+      const servicios = await api.get('/servicios/');
+
+      if (servicios.length === 0) {
+        grid.innerHTML = `
+                    <div class="col-span-full text-center py-12 bg-white/50 rounded-2xl border border-gray-100">
+                        <i class="fas fa-inbox text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500">No hay servicios disponibles por el momento.</p>
+                    </div>
+                `;
+        return;
+      }
+
+      const iconMap = {
+        'manos': 'fa-hand-sparkles',
+        'pies': 'fa-shoe-prints',
+        'tradicional': 'fa-paint-brush',
+        'semi': 'fa-gem',
+        'rubber': 'fa-layer-group',
+        'default': 'fa-star'
+      };
+
+      grid.innerHTML = servicios.map(s => {
+        let icon = iconMap.default;
+        const nameLower = s.nombre_servicio.toLowerCase();
+        if (nameLower.includes('manos')) icon = iconMap.manos;
+        else if (nameLower.includes('pies')) icon = iconMap.pies;
+        else if (nameLower.includes('rubber')) icon = iconMap.rubber;
+        else if (nameLower.includes('semi')) icon = iconMap.semi;
+
+        return `
+                <div class="group bg-white rounded-3xl p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:border-primary/20 transition-all duration-300 flex flex-col items-start relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-primary-light to-transparent rounded-bl-full -mr-8 -mt-8 opacity-50 group-hover:scale-150 transition-transform duration-500"></div>
+                    
+                    <div class="w-14 h-14 bg-primary-light text-primary rounded-2xl flex items-center justify-center text-2xl mb-4 group-hover:rotate-12 transition-transform">
+                        <i class="fas ${icon}"></i>
+                    </div>
+                    
+                    <h3 class="text-xl font-bold text-gray-800 mb-2 font-serif">${s.nombre_servicio}</h3>
+                    <p class="text-gray-500 text-sm mb-4 line-clamp-2">${s.descripcion || 'Sin descripción'}</p>
+                    
+                    <div class="mt-auto w-full flex items-center justify-between pt-4 border-t border-gray-50">
+                        <div>
+                            <span class="block text-xs text-gray-400 uppercase tracking-wide">Precio</span>
+                            <span class="text-2xl font-bold text-primary">$${s.precio}</span>
+                        </div>
+                        <div class="text-right">
+                             <span class="block text-xs text-gray-400 uppercase tracking-wide">Duración</span>
+                            <span class="text-sm font-medium text-gray-600"><i class="far fa-clock mr-1"></i>${s.duracion_minutos}m</span>
+                        </div>
+                    </div>
+
+                    <a href="/?service=${s.id}#booking" class="mt-6 w-full py-3 rounded-xl bg-gray-50 text-gray-700 font-bold text-center hover:bg-primary hover:text-white transition-colors group-hover:shadow-md">
+                        Reservar
+                    </a>
+                </div>
+                `;
+      }).join('');
+
+    } catch (error) {
+      console.error(error);
+      grid.innerHTML = `
+                <div class="col-span-full text-center py-8">
+                    <p class="text-red-500 bg-red-50 inline-block px-4 py-2 rounded-lg border border-red-100">
+                        <i class="fas fa-exclamation-circle mr-2"></i>Error al cargar servicios.
+                    </p>
+                </div>
+            `;
+    }
+  });
+</script>
+{% endblock %}

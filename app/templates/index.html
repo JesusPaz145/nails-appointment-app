@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio | Nails by Anais{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section
+    class="relative pt-24 pb-20 px-6 rounded-b-[4rem] bg-gradient-to-br from-pink-50 to-pink-100 overflow-hidden text-center mb-12">
+    <!-- Decorative Circle -->
+    <div
+        class="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse">
+    </div>
+    <div
+        class="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-yellow-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse">
+    </div>
+
+    <div class="relative z-10 max-w-4xl mx-auto">
+        <h1
+            class="text-5xl md:text-7xl font-bold font-serif mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-dark">
+            Nails by Anais
+        </h1>
+        <p class="text-xl md:text-2xl text-gray-600 mb-10 max-w-2xl mx-auto font-light leading-relaxed">
+            Experiencia premium, estilo inigualable y el cuidado que tus manos merecen.
+        </p>
+        <a href="/servicios"
+            class="inline-flex items-center gap-3 bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-4 rounded-full text-lg font-bold shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
+            <span>Reservar Cita</span>
+            <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="container mx-auto px-4 py-12">
+    <h2 class="text-4xl text-center font-bold font-serif text-gray-800 mb-12">¿Por qué elegirnos?</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Feature 1 -->
+        <div
+            class="bg-white/60 backdrop-blur-xl border border-white/50 p-8 rounded-[2rem] shadow-lg hover:shadow-xl transition-all hover:-translate-y-2 text-center group">
+            <div
+                class="w-20 h-20 mx-auto bg-primary-light rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <i class="fas fa-sparkles text-3xl text-primary"></i>
+            </div>
+            <h3 class="text-2xl font-serif font-bold text-gray-800 mb-3">Diseños Exclusivos</h3>
+            <p class="text-gray-600 leading-relaxed">Arte único y personalizado. Trae tu idea o déjate sorprender por
+                nuestra creatividad.</p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div
+            class="bg-white/60 backdrop-blur-xl border border-white/50 p-8 rounded-[2rem] shadow-lg hover:shadow-xl transition-all hover:-translate-y-2 text-center group">
+            <div
+                class="w-20 h-20 mx-auto bg-primary-light rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <i class="far fa-calendar-check text-3xl text-primary"></i>
+            </div>
+            <h3 class="text-2xl font-serif font-bold text-gray-800 mb-3">Fácil Reserva</h3>
+            <p class="text-gray-600 leading-relaxed">Olvídate de las llamadas. Agenda tu cita online en segundos y
+                recibe recordatorios.</p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div
+            class="bg-white/60 backdrop-blur-xl border border-white/50 p-8 rounded-[2rem] shadow-lg hover:shadow-xl transition-all hover:-translate-y-2 text-center group">
+            <div
+                class="w-20 h-20 mx-auto bg-primary-light rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <i class="fas fa-heart text-3xl text-primary"></i>
+            </div>
+            <h3 class="text-2xl font-serif font-bold text-gray-800 mb-3">Cuidado Premium</h3>
+            <p class="text-gray-600 leading-relaxed">Utilizamos solo productos de alta gama para garantizar la salud y
+                belleza de tus uñas.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Booking Section -->
+<section id="booking" class="bg-gradient-to-br from-pink-50 to-white py-20 px-4">
+    <div class="container mx-auto max-w-4xl">
+        <div
+            class="bg-white/80 backdrop-blur-lg rounded-[2.5rem] p-8 md:p-12 shadow-2xl border border-white/50 relative overflow-hidden">
+            <!-- Decorative Elements -->
+            <div
+                class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none">
+            </div>
+
+            <div class="text-center mb-10 relative z-10">
+                <h2 class="text-3xl md:text-4xl font-serif font-bold text-gray-800 mb-4">Reserva tu Cita</h2>
+                <p class="text-gray-500">Completa el formulario y nos pondremos en contacto contigo.</p>
+            </div>
+
+            <form id="booking-form" class="space-y-6 relative z-10">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Service Selection -->
+                    <div class="col-span-1 md:col-span-2">
+                        <label for="service-select"
+                            class="block text-sm font-bold text-gray-700 mb-2 ml-1">Servicio</label>
+                        <div class="relative">
+                            <select id="service-select" name="servicio_id" required
+                                class="w-full pl-5 pr-10 py-4 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 font-medium focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none appearance-none transition-all cursor-pointer">
+                                <option value="" disabled selected>Selecciona un servicio...</option>
+                                <!-- Options populated by JS -->
+                            </select>
+                            <div
+                                class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-400">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Date -->
+                    <div>
+                        <label for="fecha" class="block text-sm font-bold text-gray-700 mb-2 ml-1">Fecha</label>
+                        <input type="date" id="fecha" name="fecha_cita" required
+                            class="w-full px-5 py-4 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 font-medium focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all">
+                    </div>
+
+                    <!-- Time -->
+                    <div>
+                        <label for="hora" class="block text-sm font-bold text-gray-700 mb-2 ml-1">Hora</label>
+                        <select id="hora" name="hora_inicio" required disabled
+                            class="w-full pl-5 pr-10 py-4 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 font-medium focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none appearance-none transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                            <option value="" disabled selected>Selecciona fecha primero...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit"
+                    class="w-full bg-gradient-to-r from-primary to-primary-dark text-white font-bold text-lg py-4 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 mt-4">
+                    Confirmar Reserva <i class="fas fa-check-circle ml-2"></i>
+                </button>
+            </form>
+
+            <div id="booking-msg" class="hidden mt-6 text-center p-4 rounded-xl font-medium"></div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Elements
+        const serviceSelect = document.getElementById('service-select');
+        const dateInput = document.getElementById('fecha');
+        const timeSelect = document.getElementById('hora');
+        const submitBtn = document.querySelector('button[type="submit"]'); // Use querySelector to find the button
+        const form = document.getElementById('booking-form');
+        const msgDiv = document.getElementById('booking-msg');
+
+        // Initial State
+        submitBtn.disabled = true;
+
+        // 1. Load Services
+        let servicesData = [];
+        try {
+            const res = await api.get('/servicios/');
+            servicesData = res;
+
+            servicesData.forEach(s => {
+                const option = document.createElement('option');
+                option.value = s.id;
+                option.textContent = `${s.nombre_servicio} - $${s.precio}`;
+                serviceSelect.appendChild(option);
+            });
+
+            // Handle URL Params
+            const urlParams = new URLSearchParams(window.location.search);
+            const serviceId = urlParams.get('service');
+            if (serviceId) {
+                serviceSelect.value = serviceId;
+                const bookingSection = document.getElementById('booking');
+                if (bookingSection) bookingSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        } catch (e) {
+            console.error("Error loading services", e);
+            serviceSelect.innerHTML = '<option>Error cargando servicios</option>';
+        }
+
+        // 2. Availability Logic
+        async function updateSlots() {
+            const servicioId = serviceSelect.value;
+            const fecha = dateInput.value;
+
+            timeSelect.innerHTML = '<option value="" disabled selected>Cargando horas...</option>';
+            timeSelect.disabled = true;
+            submitBtn.disabled = true;
+
+            if (!servicioId || !fecha) {
+                timeSelect.innerHTML = '<option value="" disabled selected>Selecciona servicio y fecha...</option>';
+                return;
+            }
+
+            try {
+                const slots = await api.get(`/citas/disponibilidad?fecha=${fecha}&servicio_id=${servicioId}`);
+
+                timeSelect.innerHTML = '<option value="" disabled selected>Selecciona una hora...</option>';
+
+                if (slots.length === 0) {
+                    const option = document.createElement('option');
+                    option.disabled = true;
+                    option.textContent = "No hay horarios disponibles";
+                    timeSelect.appendChild(option);
+                } else {
+                    slots.forEach(slot => {
+                        const option = document.createElement('option');
+                        option.value = slot;
+                        // Format nice time (HH:MM)
+                        option.textContent = slot.substring(0, 5);
+                        timeSelect.appendChild(option);
+                    });
+                    timeSelect.disabled = false;
+                }
+            } catch (error) {
+                console.error(error);
+                timeSelect.innerHTML = '<option value="" disabled selected>Error al cargar disponibilidad</option>';
+            }
+        }
+
+        serviceSelect.addEventListener('change', updateSlots);
+        dateInput.addEventListener('change', updateSlots);
+        timeSelect.addEventListener('change', () => {
+            // Only enable submit if a time is actually selected
+            if (timeSelect.value) submitBtn.disabled = false;
+        });
+
+        // 3. Handle Form Submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const data = {
+                servicio_id: parseInt(formData.get('servicio_id')),
+                fecha_cita: formData.get('fecha_cita'),
+                hora_inicio: formData.get('hora_inicio') // Already HH:MM:SS from API response
+            };
+
+            msgDiv.className = 'hidden mt-6 text-center p-4 rounded-xl font-medium';
+            msgDiv.textContent = '';
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Procesando...';
+
+            try {
+                await api.post('/citas/', data);
+                // Success feedback
+                alert('¡Cita registrada con éxito! 💅✨\nRedirigiendo a tus citas...');
+                window.location.href = '/mis-citas';
+            } catch (error) {
+                console.error(error);
+                msgDiv.textContent = error.message || 'Error al reservar. ¿Iniciaste sesión?';
+                msgDiv.classList.remove('hidden', 'bg-green-50', 'text-green-600');
+                msgDiv.classList.add('bg-red-50', 'text-red-600');
+
+                if (error.status === 401 || error.message.includes('autenticado')) {
+                    setTimeout(() => window.location.href = '/login', 2000);
+                }
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Confirmar Reserva <i class="fas fa-check-circle ml-2"></i>';
+            }
+        });
+    });
+</script>
+{% endblock %}

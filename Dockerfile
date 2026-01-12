@@ -1,32 +1,25 @@
-FROM node:18-alpine
+FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Install system dependencies
+# build-essential and libpq-dev are often needed for psychopg2, though we use binary for now
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies
-RUN npm install
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy source code
-COPY . .
+# Copy the entire app directory into the container's /app/app
+# We're running from the root context, and the code is in ./app
+COPY app ./app
 
-# Build the app (for static generation or SSR if configured)
-# Since we are using basic Astro, 'npm run build' generates static files in dist/
-# But we used 'npm run dev' to develop. 
-# For production, we can serve the 'dist' folder or run in preview mode.
-# 'npm run preview' serves the built files on port 4321.
+# Expose port (FastAPI default is usually 8000, but we can match the old backend 5000 or use 8000)
+# Let's use 8000 for standard FastAPI, and map it in docker-compose.
+EXPOSE 8000
 
-RUN npm run build
-
-# Expose port
-EXPOSE 4321
-
-# Host should be 0.0.0.0 to be accessible outside container
-ENV HOST=0.0.0.0
-# Install a small static server and serve the built `dist` folder.
-# Using a static server avoids running Vite preview in production and
-# prevents host-check blocking. `serve` is lightweight and suitable
-# for static deployments.
-RUN npm install -g serve
-CMD ["serve", "-s", "dist", "-l", "4321"]
+# Command to run the application
+# We run uvicorn on app.main:app
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

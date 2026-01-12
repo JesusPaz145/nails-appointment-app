@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Registrarse | Nails by Anais{% endblock %}
+
+{% block content %}
+<div class="container flex justify-center items-center" style="min-height: 80vh;">
+    <div class="card" style="width: 100%; max-width: 450px;">
+        <h1 class="text-center" style="color: var(--color-primary); margin-bottom: 2rem;">Crear Cuenta</h1>
+
+        <form id="register-form">
+            <div class="mb-2">
+                <label for="name" style="display: block; margin-bottom: 0.5rem;">Nombre Completo</label>
+                <input type="text" id="name" name="name" required
+                    style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px;">
+            </div>
+
+            <div class="mb-2">
+                <label for="user" style="display: block; margin-bottom: 0.5rem;">Usuario</label>
+                <input type="text" id="user" name="username" required
+                    style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px;">
+            </div>
+
+            <div class="mb-2">
+                <label for="email" style="display: block; margin-bottom: 0.5rem;">Email</label>
+                <input type="email" id="email" name="email"
+                    style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px;">
+            </div>
+
+            <div class="mb-2">
+                <label for="phone" style="display: block; margin-bottom: 0.5rem;">Teléfono</label>
+                <input type="tel" id="phone" name="phone"
+                    style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px;">
+            </div>
+
+            <div class="mb-2">
+                <label for="pwd" style="display: block; margin-bottom: 0.5rem;">Contraseña</label>
+                <input type="password" id="pwd" name="password" required
+                    style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px;">
+            </div>
+
+            <div class="mb-2">
+                <label for="pwd_confirm" style="display: block; margin-bottom: 0.5rem;">Confirmar Contraseña</label>
+                <input type="password" id="pwd_confirm" name="pwd_confirm" required
+                    style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px;">
+            </div>
+
+            <div id="error-msg"
+                style="color: var(--color-error); display: none; margin-bottom: 1rem; text-align: center;"></div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Registrarse</button>
+        </form>
+        <p class="text-center mt-2">
+            ¿Ya tienes cuenta? <a href="/login" style="color: var(--color-primary); font-weight: 600;">Inicia Sesión
+                aquí</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/api.js"></script>
+<script>
+    const form = document.getElementById('register-form');
+    const errorMsg = document.getElementById('error-msg');
+
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorMsg.style.display = 'none';
+            errorMsg.textContent = '';
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+
+            if (data.password !== data.pwd_confirm) {
+                errorMsg.textContent = 'Las contraseñas no coinciden';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            try {
+                // Register endpoint expects "username" and "password" but schema says "username" matches input "username"
+                // My Register logic in python expects UserCreate which has username.
+                // The form uses name="username".
+                // But the backend register logic takes UserCreate.
+                await api.post('/auth/register', data);
+                // Redirect on success
+                window.location.href = '/login';
+            } catch (err) {
+                errorMsg.textContent = err.message || 'Error al registrarse';
+                errorMsg.style.display = 'block';
+            }
+        });
+    }
+</script>
+{% endblock %}

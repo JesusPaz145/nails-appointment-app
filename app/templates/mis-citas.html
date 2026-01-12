@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Mis Citas | Nails by Anais{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 pt-24 pb-12 px-4">
+    <div class="container mx-auto max-w-4xl">
+        <h1 class="text-4xl font-serif font-bold text-gray-800 mb-8 text-center">Mis Citas</h1>
+
+        <!-- Tabs Navigation -->
+        <div class="flex justify-center mb-8">
+            <div class="bg-white p-1 rounded-2xl shadow-sm border border-gray-100 inline-flex">
+                <button id="tab-active" onclick="switchTab('active')"
+                    class="px-6 py-3 rounded-xl font-bold transition-all duration-300 bg-primary text-white shadow-md">
+                    Próximas & Pendientes
+                </button>
+                <button id="tab-history" onclick="switchTab('history')"
+                    class="px-6 py-3 rounded-xl font-bold transition-all duration-300 text-gray-500 hover:text-primary hover:bg-pink-50">
+                    Historial / Canceladas
+                </button>
+            </div>
+        </div>
+
+        <!-- Feedback Messages -->
+        <div id="msg-box" class="hidden mb-6 p-4 rounded-xl text-center font-medium"></div>
+
+        <!-- Content Area -->
+        <div id="citas-container" class="space-y-6">
+            <!-- Loader -->
+            <div class="text-center py-12">
+                <i class="fas fa-circle-notch fa-spin text-4xl text-primary/50"></i>
+                <p class="mt-4 text-gray-500">Cargando tus citas...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let allCitas = [];
+    let currentTab = 'active'; // 'active' or 'history'
+
+    document.addEventListener('DOMContentLoaded', loadCitas);
+
+    async function loadCitas() {
+        try {
+            const res = await api.get('/citas/');
+            allCitas = res;
+            renderCitas();
+        } catch (error) {
+            console.error(error);
+            document.getElementById('citas-container').innerHTML = `
+                <div class="text-center py-12 bg-white rounded-[2rem] shadow-sm">
+                    <i class="fas fa-exclamation-circle text-4xl text-red-300 mb-4"></i>
+                    <p class="text-gray-600">Error al cargar las citas. <br> <a href="/login" class="text-primary hover:underline">Inicia sesión nuevamente</a>.</p>
+                </div>
+            `;
+        }
+    }
+
+    function switchTab(tab) {
+        currentTab = tab;
+
+        // Update Buttons
+        const activeBtn = document.getElementById('tab-active');
+        const historyBtn = document.getElementById('tab-history');
+
+        if (tab === 'active') {
+            activeBtn.className = "px-6 py-3 rounded-xl font-bold transition-all duration-300 bg-primary text-white shadow-md";
+            historyBtn.className = "px-6 py-3 rounded-xl font-bold transition-all duration-300 text-gray-500 hover:text-primary hover:bg-pink-50";
+        } else {
+            activeBtn.className = "px-6 py-3 rounded-xl font-bold transition-all duration-300 text-gray-500 hover:text-primary hover:bg-pink-50";
+            historyBtn.className = "px-6 py-3 rounded-xl font-bold transition-all duration-300 bg-gray-600 text-white shadow-md";
+        }
+
+        renderCitas();
+    }
+
+    function renderCitas() {
+        const container = document.getElementById('citas-container');
+
+        // Filter based on tab
+        const filtered = allCitas.filter(c => {
+            if (currentTab === 'active') {
+                return c.estado === 'pendiente' || c.estado === 'confirmada';
+            } else {
+                return c.estado === 'cancelada' || c.estado === 'completada';
+            }
+        });
+
+        if (filtered.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-16 bg-white/60 rounded-[2rem] border border-dashed border-gray-300">
+                    <i class="far fa-calendar-times text-4xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500 text-lg">No hay citas en esta sección.</p>
+                    ${currentTab === 'active' ? '<a href="/#booking" class="mt-4 inline-block text-primary font-bold hover:underline">¡Reserva una ahora!</a>' : ''}
+                </div>
+            `;
+            return;
+        }
+
+        // Generate HTML
+        // Sorting is handled by backend (ID DESC -> Newest created first)
+        container.innerHTML = filtered.map(cita => {
+            const fecha = new Date(cita.fecha_cita).toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+            let statusColor = 'bg-yellow-100 text-yellow-700 border-yellow-200';
+            let icon = 'fa-clock';
+
+            if (cita.estado === 'confirmada') { statusColor = 'bg-green-100 text-green-700 border-green-200'; icon = 'fa-check-circle'; }
+            if (cita.estado === 'cancelada') { statusColor = 'bg-red-100 text-red-700 border-red-200'; icon = 'fa-times-circle'; }
+            if (cita.estado === 'completada') { statusColor = 'bg-blue-100 text-blue-700 border-blue-200'; icon = 'fa-star'; }
+
+            const canCancel = currentTab === 'active' && cita.estado !== 'cancelada';
+
+            return `
+                <div class="bg-white rounded-[2rem] p-6 md:p-8 shadow-lg border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 group hover:translate-x-1 transition-transform duration-300">
+                    <div class="flex items-start gap-5">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-50 to-pink-100 flex items-center justify-center shadow-inner text-2xl">
+                             💅
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800 mb-1">${cita.servicio ? cita.servicio.nombre_servicio : 'Servicio eliminado'}</h3>
+                            <div class="flex items-center gap-2 text-gray-500 text-sm mb-2">
+                                <i class="far fa-calendar-alt"></i> <span>${fecha}</span>
+                                <span class="mx-1">•</span>
+                                <i class="far fa-clock"></i> <span>${cita.hora_inicio.substring(0, 5)}</span>
+                            </div>
+                            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold border ${statusColor}">
+                                <i class="fas ${icon}"></i> ${cita.estado.charAt(0).toUpperCase() + cita.estado.slice(1)}
+                            </span>
+                        </div>
+                    </div>
+
+                    ${canCancel ? `
+                        <button onclick="cancelCita(${cita.id})" 
+                            class="w-full md:w-auto px-6 py-3 rounded-xl border-2 border-red-50 text-red-400 font-bold hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all text-sm">
+                            <i class="fas fa-ban mr-2"></i> Cancelar Cita
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function cancelCita(id) {
+        if (!confirm('¿Estás segura de que quieres cancelar esta cita?')) return;
+
+        try {
+            await api.put(`/citas/${id}`, { estado: 'cancelada' });
+            // Show feedback
+            const msgBox = document.getElementById('msg-box');
+            msgBox.textContent = "Cita cancelada correctamente.";
+            msgBox.className = "mb-6 p-4 rounded-xl text-center font-medium bg-green-50 text-green-700 block";
+
+            // Reload data
+            loadCitas();
+
+            // Auto hide msg
+            setTimeout(() => {
+                msgBox.classList.add('hidden');
+                msgBox.classList.remove('block');
+            }, 3000);
+
+        } catch (error) {
+            alert('Error al cancelar: ' + error.message);
+        }
+    }
+</script>
+{% endblock %}

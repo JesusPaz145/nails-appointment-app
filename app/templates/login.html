@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar Sesión | Nails by Anais{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-[80vh] px-4">
+    <div
+        class="w-full max-w-md bg-white/80 backdrop-blur-xl border border-white/50 p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+        <!-- Decoration -->
+        <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary to-secondary"></div>
+
+        <h1 class="text-3xl font-serif font-bold text-center text-gray-800 mb-8">Acceder</h1>
+
+        <form id="login-form" class="space-y-6">
+            <div>
+                <label for="user" class="block text-sm font-medium text-gray-700 mb-1 ml-1">Usuario</label>
+                <input type="text" id="user" name="username" required
+                    class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                    placeholder="Tu usuario">
+            </div>
+
+            <div>
+                <label for="pwd" class="block text-sm font-medium text-gray-700 mb-1 ml-1">Contraseña</label>
+                <input type="password" id="pwd" name="password" required
+                    class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                    placeholder="••••••••">
+            </div>
+
+            <div id="error-msg"
+                class="hidden text-red-500 text-sm text-center bg-red-50 p-3 rounded-lg border border-red-100 animate-pulse">
+                <!-- JS will inject error here -->
+            </div>
+
+            <button type="submit"
+                class="w-full bg-gradient-to-r from-primary to-primary-dark text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
+                Iniciar Sesión
+            </button>
+        </form>
+
+        <p class="text-center mt-8 text-gray-600">
+            ¿No tienes cuenta?
+            <a href="/register" class="text-primary font-bold hover:underline">Regístrate aquí</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const form = document.getElementById('login-form');
+    const errorMsg = document.getElementById('error-msg');
+
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorMsg.classList.add('hidden');
+            errorMsg.textContent = '';
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+
+            try {
+                await api.post('/auth/login', data);
+                // Redirect on success
+                window.location.href = '/';
+            } catch (err) {
+                errorMsg.textContent = err.message || 'Error al iniciar sesión';
+                errorMsg.classList.remove('hidden');
+            }
+        });
+    }
+</script>
+{% endblock %}

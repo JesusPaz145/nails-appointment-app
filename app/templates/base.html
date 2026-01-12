@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Nails by Anais - Reserva tus citas">
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#d63384',
+                        'primary-dark': '#a61e4d',
+                        'primary-light': '#fce7f3',
+                        secondary: '#d4af37',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom tweaks that Tailwind can't easily handle or for specific overrides */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #fff0f3 0%, #fff5f5 100%);
+            min-height: 100vh;
+        }
+
+        h1,
+        h2,
+        h3,
+        .font-serif {
+            font-family: 'Playfair Display', serif;
+        }
+    </style>
+    <title>{% block title %}Nails by Anais{% endblock %}</title>
+</head>
+
+<body class="text-gray-800">
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center relative">
+            <a href="/"
+                class="text-2xl font-bold text-primary flex items-center gap-2 font-serif hover:scale-105 transition-transform">
+                <span>💅 Nails by Anais</span>
+            </a>
+
+            <!-- Mobile Menu Button -->
+            <button id="menu-toggle" class="md:hidden text-primary text-2xl focus:outline-none">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <!-- Desktop Nav -->
+            <nav id="main-nav" class="hidden md:flex items-center gap-6">
+                <ul class="flex items-center gap-1">
+                    <li><a href="/" id="nav-home"
+                            class="px-4 py-2 rounded-full hover:bg-primary-light hover:text-primary transition-colors font-medium">Inicio</a>
+                    </li>
+                    <li><a href="/servicios" id="nav-services"
+                            class="px-4 py-2 rounded-full hover:bg-primary-light hover:text-primary transition-colors font-medium">Servicios</a>
+                    </li>
+                    <li id="auth-link"><a href="/login"
+                            class="bg-primary text-white px-6 py-2 rounded-full font-bold hover:bg-primary-dark shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5">Login</a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Mobile Nav Dropdown (Hidden via JS initially) -->
+            <div id="mobile-menu"
+                class="fixed inset-0 bg-white z-[60] transform translate-x-full transition-transform duration-300 ease-in-out md:hidden flex flex-col pt-20 px-6 gap-6 shadow-2xl">
+                <button id="close-menu" class="absolute top-4 right-4 text-3xl text-gray-500 hover:text-primary">
+                    <i class="fas fa-times"></i>
+                </button>
+                <a href="/" class="text-xl font-medium border-b border-gray-100 pb-2">Inicio</a>
+                <a href="/servicios" class="text-xl font-medium border-b border-gray-100 pb-2">Servicios</a>
+                <div id="mobile-auth-container" class="mt-4">
+                    <a href="/login"
+                        class="block w-full text-center bg-primary text-white py-3 rounded-xl font-bold text-lg shadow-md">Login</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="min-h-[calc(100vh-200px)]">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-white py-8 mt-12 border-t border-gray-100">
+        <div class="container mx-auto px-4 text-center text-gray-500">
+            <p>&copy; 2024 Nails by Anais. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="/static/js/api.js"></script>
+    <script>
+        // Mobile Menu Logic
+        const menuToggle = document.getElementById('menu-toggle');
+        const closeMenu = document.getElementById('close-menu');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        function toggleMenu() {
+            mobileMenu.classList.toggle('translate-x-full');
+            document.body.classList.toggle('overflow-hidden');
+        }
+
+        if (menuToggle) menuToggle.addEventListener('click', toggleMenu);
+        if (closeMenu) closeMenu.addEventListener('click', toggleMenu);
+
+        // Active Link Highlight
+        const path = window.location.pathname;
+        if (path === '/' || path === '/index.html') {
+            document.getElementById('nav-home').classList.add('text-primary', 'bg-primary-light');
+        } else if (path.startsWith('/servicios')) {
+            document.getElementById('nav-services').classList.add('text-primary', 'bg-primary-light');
+        }
+
+        // Auth Logic
+        async function checkAuth() {
+            try {
+                const res = await fetch('/api/auth/me');
+                if (res.ok) {
+                    const user = await res.json();
+
+                    // Desktop Update
+                    const authLink = document.getElementById('auth-link');
+                    const navUl = document.querySelector('nav ul');
+                    if (authLink) {
+                        // Insert Mis Citas
+                        const li = document.createElement('li');
+                        li.innerHTML = '<a href="/mis-citas" class="px-4 py-2 rounded-full hover:bg-primary-light hover:text-primary transition-colors font-medium">Mis Citas</a>';
+                        navUl.insertBefore(li, authLink);
+
+                        if (user.usr_lvl === 1) {
+                            const adminLi = document.createElement('li');
+                            adminLi.innerHTML = '<a href="/admin" class="px-4 py-2 rounded-full hover:bg-primary-light hover:text-primary transition-colors font-medium">Admin</a>';
+                            navUl.insertBefore(adminLi, authLink);
+                        }
+
+                        authLink.innerHTML = '<button id="logout-btn" class="text-gray-600 hover:text-primary font-medium px-4">Logout</button>';
+                        document.getElementById('logout-btn').addEventListener('click', async () => {
+                            await fetch('/api/auth/logout', { method: 'POST' });
+                            window.location.href = '/';
+                        });
+                    }
+
+                    // Mobile Update
+                    const mobileAuth = document.getElementById('mobile-auth-container');
+                    let mobileLinks = '<a href="/mis-citas" class="text-xl font-medium border-b border-gray-100 pb-2 block mb-4">Mis Citas</a>';
+                    if (user.usr_lvl === 1) {
+                        mobileLinks += '<a href="/admin" class="text-xl font-medium border-b border-gray-100 pb-2 block mb-4">Admin</a>';
+                    }
+                    mobileAuth.innerHTML = mobileLinks + '<button id="mobile-logout" class="block w-full text-center border-2 border-primary text-primary py-3 rounded-xl font-bold text-lg">Logout</button>';
+
+                    document.getElementById('mobile-logout').addEventListener('click', async () => {
+                        await fetch('/api/auth/logout', { method: 'POST' });
+                        window.location.href = '/';
+                    });
+                }
+            } catch (e) {
+                console.log("Not logged in");
+            }
+        }
+        checkAuth();
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

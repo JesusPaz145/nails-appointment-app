@@ -4,7 +4,6 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev --host 0.0.0.0",
-    "dev:all": "concurrently \"npm run dev\" \"npm run dev --prefix backend\"",
     "build": "astro build",
     "preview": "astro preview --host 0.0.0.0",
     "astro": "astro"
@@ -16,8 +15,5 @@
     "astro": "^5.16.6",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
-  },
-  "devDependencies": {
-    "concurrently": "^9.2.1"
   }
 }

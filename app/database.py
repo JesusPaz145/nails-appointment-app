@@ -12,13 +12,10 @@ DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", "5432")
 DB_NAME = os.getenv("DB_NAME", "nailsbyanais")
 
-import urllib.parse
-
-encoded_user = urllib.parse.quote_plus(DB_USER)
-encoded_pass = urllib.parse.quote_plus(DB_PASS)
-
 # AsyncPG URL
 DATABASE_URL = f"postgresql+asyncpg://{encoded_user}:{encoded_pass}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+
+print(f"DEBUG: Intentando conectar a la DB en host='{DB_HOST}', port='{DB_PORT}', name='{DB_NAME}'")
 
 engine = create_async_engine(DATABASE_URL, echo=False)
 

@@ -1,7 +1,8 @@
 // Dynamically determine API URL based on current host
 // This allows the app to work on localhost OR a server IP (like 192.168.x.x) automatically
 const getApiUrl = () => {
-    return '/api';
+    if (typeof window === 'undefined') return 'http://localhost:5000/api'; // Server-side fallback
+    return `http://${window.location.hostname}:5000/api`;
 };
 
 const API_URL = getApiUrl();

@@ -104,10 +104,6 @@ ul {
   justify-content: center;
 }
 
-.justify-between {
-  justify-content: space-between;
-}
-
 .items-center {
   align-items: center;
 }

@@ -3,7 +3,8 @@ import '../styles/booking.css';
 
 // Dynamically determine API URL based on current host
 const getApiUrl = () => {
-    return '/api';
+    if (typeof window === 'undefined') return 'http://localhost:5000/api';
+    return `http://${window.location.hostname}:5000/api`;
 };
 
 const API_URL = getApiUrl();

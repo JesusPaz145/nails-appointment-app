@@ -10,6 +10,14 @@ const API_URL = getApiUrl();
 // Helper to get token from cookie - actually we are using httpOnly cookies, so we don't need to send it manually.
 // The browser handles it. We just need to ensure credentials: 'include'.
 
+async function parseResponse(res) {
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+        return res.json();
+    }
+    return res.text();
+}
+
 export const api = {
     async get(endpoint) {
         const res = await fetch(`${API_URL}${endpoint}`, {
@@ -20,10 +28,14 @@ export const api = {
             credentials: 'include'
         });
         if (!res.ok) {
-            const error = await res.json();
-            throw new Error(error.msg || 'Something went wrong');
+            const errorBody = await (async () => {
+                try { return await parseResponse(res); } catch (e) { return res.statusText || 'Unknown error'; }
+            })();
+            // If errorBody is a JSON object, try to extract a .msg
+            const msg = (typeof errorBody === 'object' && errorBody !== null) ? (errorBody.msg || JSON.stringify(errorBody)) : String(errorBody);
+            throw new Error(msg || 'Something went wrong');
         }
-        return res.json();
+        return parseResponse(res);
     },
 
     async post(endpoint, body) {
@@ -36,10 +48,13 @@ export const api = {
             credentials: 'include'
         });
         if (!res.ok) {
-            const error = await res.json();
-            throw new Error(error.msg || 'Something went wrong');
+            const errorBody = await (async () => {
+                try { return await parseResponse(res); } catch (e) { return res.statusText || 'Unknown error'; }
+            })();
+            const msg = (typeof errorBody === 'object' && errorBody !== null) ? (errorBody.msg || JSON.stringify(errorBody)) : String(errorBody);
+            throw new Error(msg || 'Something went wrong');
         }
-        return res.json();
+        return parseResponse(res);
     },
 
     async put(endpoint, body) {
@@ -52,10 +67,13 @@ export const api = {
             credentials: 'include'
         });
         if (!res.ok) {
-            const error = await res.json();
-            throw new Error(error.msg || 'Something went wrong');
+            const errorBody = await (async () => {
+                try { return await parseResponse(res); } catch (e) { return res.statusText || 'Unknown error'; }
+            })();
+            const msg = (typeof errorBody === 'object' && errorBody !== null) ? (errorBody.msg || JSON.stringify(errorBody)) : String(errorBody);
+            throw new Error(msg || 'Something went wrong');
         }
-        return res.json();
+        return parseResponse(res);
     },
 
     async delete(endpoint) {
@@ -64,9 +82,12 @@ export const api = {
             credentials: 'include'
         });
         if (!res.ok) {
-            const error = await res.json();
-            throw new Error(error.msg || 'Something went wrong');
+            const errorBody = await (async () => {
+                try { return await parseResponse(res); } catch (e) { return res.statusText || 'Unknown error'; }
+            })();
+            const msg = (typeof errorBody === 'object' && errorBody !== null) ? (errorBody.msg || JSON.stringify(errorBody)) : String(errorBody);
+            throw new Error(msg || 'Something went wrong');
         }
-        return res.json();
+        return parseResponse(res);
     }
 };

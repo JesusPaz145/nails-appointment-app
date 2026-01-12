@@ -8,10 +8,12 @@ export default defineConfig({
   integrations: [react()],
   vite: {
     preview: {
-      allowedHosts: true,
+      // Allow the production host(s) so Vite preview won't block requests from them
+      allowedHosts: [ 'nails.yisustech.com' ],
     },
     server: {
-      allowedHosts: true,
+      // Allow local development hosts too
+      allowedHosts: [ 'localhost', 'nails.yisustech.com' ],
     }
   }
 });

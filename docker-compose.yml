@@ -26,9 +26,9 @@ services:
     networks:
       - nails_net
     volumes:
-      - ./app:/app/app # Sync code for development
+      #- ./app:/app/app # Sync code for development (Commented for Prod/Stability)
 
-# Removed 'db' service as user provides their own
+      # Removed 'db' service as user provides their own
 
 networks:
   nails_net:

@@ -24,6 +24,9 @@ EXPOSE 4321
 
 # Host should be 0.0.0.0 to be accessible outside container
 ENV HOST=0.0.0.0
-
-# Start the app in preview mode (serves the dist folder)
-CMD ["npm", "run", "preview", "--", "--host"]
+# Install a small static server and serve the built `dist` folder.
+# Using a static server avoids running Vite preview in production and
+# prevents host-check blocking. `serve` is lightweight and suitable
+# for static deployments.
+RUN npm install -g serve
+CMD ["serve", "-s", "dist", "-l", "4321"]

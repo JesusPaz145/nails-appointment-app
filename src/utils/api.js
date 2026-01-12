@@ -2,13 +2,13 @@
 // This ensures production builds use the configured API endpoint (e.g. via env in Portainer).
 const getApiUrl = () => {
     // 1) Build-time env injected by Vite/Astro (import.meta.env)
+    let publicUrl;
     try {
-        const meta = typeof import !== 'undefined' ? import.meta : undefined;
-        const publicUrl = meta && meta.env && meta.env.PUBLIC_API_URL;
-        if (publicUrl) return publicUrl;
+        publicUrl = import.meta.env && import.meta.env.PUBLIC_API_URL;
     } catch (e) {
-        // ignore
+        publicUrl = undefined;
     }
+    if (publicUrl) return publicUrl;
 
     // 2) Server-side fallback
     if (typeof window === 'undefined') return 'http://localhost:5000/api';

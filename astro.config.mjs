@@ -6,13 +6,13 @@ export default defineConfig({
   integrations: [react()],
   vite: {
     server: {
-      // Permitir hosts de desarrollo y producción
-      allowedHosts: [ 'localhost', 'nails.yisustech.com', 'www.nails.yisustech.com' ],
+      // TEMP: permitir todos los hosts para debug. Revertir a lista específica cuando esté ok.
+      allowedHosts: true,
       host: '0.0.0.0',
     },
     preview: {
-      // Hosts permitidos para preview/producción
-      allowedHosts: [ 'nails.yisustech.com', 'www.nails.yisustech.com' ],
+      // TEMP: permitir todos los hosts para debug. Revertir a lista específica cuando esté ok.
+      allowedHosts: true,
       host: '0.0.0.0',
     }
   }

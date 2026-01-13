@@ -105,16 +105,13 @@ async def get_availability(
     db: AsyncSession = Depends(get_db)
 ):
     # 0. Check Blocked Days
-    from ..models import DiaBloqueado # Import locally to avoid circulars if any
+    from ..models import DiaBloqueado
     blocked_res = await db.execute(select(DiaBloqueado).where(DiaBloqueado.fecha == fecha))
     if blocked_res.scalars().first():
-        return [] # Date is blocked
+        return []
 
     # 1. Get Day of Week
-    # Python weekday(): 0=Mon, 6=Sun
-    # DB (likely): 0=Sun, 6=Sat (JS/Postgres convention often used in Node apps)
-    # Let's assume standard JS getDay() mapping: 0=Sun, 1=Mon
-    py_weekday = fecha.weekday() # 0=Mon
+    py_weekday = fecha.weekday()
     js_weekday = (py_weekday + 1) % 7 
     
     # 2. Get Business Hours
@@ -122,7 +119,7 @@ async def get_availability(
     horario = horario_res.scalars().first()
     
     if not horario:
-        return [] # Closed
+        return [] 
     
     # 3. Get Service Duration
     svc_res = await db.execute(select(Servicio).where(Servicio.id == servicio_id))
@@ -150,7 +147,6 @@ async def get_availability(
     
     slots = []
     
-    # Loop through 30 min intervals
     current_time = start_mins
     while current_time + duration <= end_mins:
         slot_start = current_time
@@ -160,17 +156,15 @@ async def get_availability(
         for cita in existing_citas:
             c_start = to_minutes(cita.hora_inicio)
             c_end = to_minutes(cita.hora_fin)
-            
-            # Helper: Overlap Logic
-            # (StartA < EndB) and (EndA > StartB)
             if slot_start < c_end and slot_end > c_start:
                 is_free = False
                 break
         
-        if is_free:
-            # Format HH:MM:SS
-            t_obj = from_minutes(slot_start)
-            slots.append(t_obj.strftime("%H:%M:%S"))
+        t_obj = from_minutes(slot_start)
+        slots.append({
+            "hora": t_obj.strftime("%H:%M:%S"),
+            "disponible": is_free
+        })
             
         current_time += step
         

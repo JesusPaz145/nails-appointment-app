@@ -114,3 +114,7 @@ class DiaBloqueado(DiaBloqueadoBase):
     id: int
     class Config:
         from_attributes = True
+
+class Slot(BaseModel):
+    hora: str
+    disponible: bool

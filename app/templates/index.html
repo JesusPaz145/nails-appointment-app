@@ -114,13 +114,14 @@
                             class="w-full px-5 py-4 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 font-medium focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all">
                     </div>
 
-                    <!-- Time -->
-                    <div>
-                        <label for="hora" class="block text-sm font-bold text-gray-700 mb-2 ml-1">Hora</label>
-                        <select id="hora" name="hora_inicio" required disabled
-                            class="w-full pl-5 pr-10 py-4 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 font-medium focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none appearance-none transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
-                            <option value="" disabled selected>Selecciona fecha primero...</option>
-                        </select>
+                    <!-- Time Slots -->
+                    <div class="col-span-1 md:col-span-2">
+                        <label class="block text-sm font-bold text-gray-700 mb-2 ml-1">Horarios Disponibles</label>
+                        <div id="time-slots-container" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                            <p class="col-span-full text-xs text-gray-400 italic">Selecciona fecha y servicio primero...
+                            </p>
+                        </div>
+                        <input type="hidden" id="hora-input" name="hora_inicio" required>
                     </div>
                 </div>
 
@@ -182,48 +183,63 @@
         async function updateSlots() {
             const servicioId = serviceSelect.value;
             const fecha = dateInput.value;
+            const slotsContainer = document.getElementById('time-slots-container');
+            const hiddenHoraInput = document.getElementById('hora-input');
 
-            timeSelect.innerHTML = '<option value="" disabled selected>Cargando horas...</option>';
-            timeSelect.disabled = true;
+            slotsContainer.innerHTML = '<p class="col-span-full text-xs text-primary animate-pulse">Cargando disponibilidad...</p>';
+            hiddenHoraInput.value = '';
             submitBtn.disabled = true;
 
-            if (!servicioId || !fecha) {
-                timeSelect.innerHTML = '<option value="" disabled selected>Selecciona servicio y fecha...</option>';
-                return;
-            }
+            if (!servicioId || !fecha) return;
 
             try {
                 const slots = await api.get(`/citas/disponibilidad?fecha=${fecha}&servicio_id=${servicioId}`);
-
-                timeSelect.innerHTML = '<option value="" disabled selected>Selecciona una hora...</option>';
+                slotsContainer.innerHTML = '';
 
                 if (slots.length === 0) {
-                    const option = document.createElement('option');
-                    option.disabled = true;
-                    option.textContent = "No hay horarios disponibles";
-                    timeSelect.appendChild(option);
-                } else {
-                    slots.forEach(slot => {
-                        const option = document.createElement('option');
-                        option.value = slot;
-                        // Format nice time (HH:MM)
-                        option.textContent = slot.substring(0, 5);
-                        timeSelect.appendChild(option);
-                    });
-                    timeSelect.disabled = false;
+                    slotsContainer.innerHTML = '<p class="col-span-full text-sm text-red-400 bg-red-50 p-3 rounded-lg border border-red-100 italic text-center">No hay disponibilidad para este día.</p>';
+                    return;
                 }
+
+                slots.forEach(slot => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.textContent = slot.hora.substring(0, 5);
+
+                    const baseBaseClasses = "px-2 py-3 rounded-xl text-sm font-bold transition-all border text-center ";
+
+                    if (slot.disponible) {
+                        btn.className = baseBaseClasses + "bg-green-50 text-green-700 border-green-100 hover:bg-green-500 hover:text-white hover:shadow-md";
+                        btn.onclick = () => {
+                            // Deselect others
+                            slotsContainer.querySelectorAll('button').forEach(b => {
+                                if (b.dataset.disponible === 'true') {
+                                    b.className = baseBaseClasses + "bg-green-50 text-green-700 border-green-100 hover:bg-green-500 hover:text-white hover:shadow-md";
+                                }
+                            });
+                            // Select this
+                            btn.className = baseBaseClasses + "bg-green-500 text-white border-green-500 shadow-lg scale-105";
+                            hiddenHoraInput.value = slot.hora;
+                            submitBtn.disabled = false;
+                        };
+                        btn.dataset.disponible = 'true';
+                    } else {
+                        btn.className = baseBaseClasses + "bg-red-50 text-red-300 border-red-100 cursor-not-allowed opacity-60";
+                        btn.title = "Ocupado";
+                        btn.disabled = true;
+                    }
+
+                    slotsContainer.appendChild(btn);
+                });
+
             } catch (error) {
                 console.error(error);
-                timeSelect.innerHTML = '<option value="" disabled selected>Error al cargar disponibilidad</option>';
+                slotsContainer.innerHTML = '<p class="col-span-full text-red-500 text-sm">Error al cargar horarios.</p>';
             }
         }
 
         serviceSelect.addEventListener('change', updateSlots);
         dateInput.addEventListener('change', updateSlots);
-        timeSelect.addEventListener('change', () => {
-            // Only enable submit if a time is actually selected
-            if (timeSelect.value) submitBtn.disabled = false;
-        });
 
         // 3. Handle Form Submission
         form.addEventListener('submit', async (e) => {

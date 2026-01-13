@@ -26,6 +26,10 @@
                 class="px-6 py-3 rounded-xl font-bold transition-all text-gray-500 hover:text-primary hover:bg-pink-50">
                 <i class="fas fa-users mr-2"></i> Usuarios
             </button>
+            <button onclick="switchAdminTab('servicios')" id="btn-servicios"
+                class="px-6 py-3 rounded-xl font-bold transition-all text-gray-500 hover:text-primary hover:bg-pink-50">
+                <i class="fas fa-hand-sparkles mr-2"></i> Servicios
+            </button>
         </div>
 
         <!-- Content Sections -->
@@ -122,6 +126,81 @@
             </div>
         </div>
 
+        <!-- SERVICIOS SECTION -->
+        <div id="tab-servicios" class="hidden space-y-6">
+            <div class="bg-white rounded-[2rem] shadow-lg p-6 border border-gray-100">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Gestionar Servicios</h2>
+                    <button onclick="openServiceModal()"
+                        class="bg-primary text-white px-6 py-2 rounded-xl font-bold hover:shadow-lg transition-all">
+                        <i class="fas fa-plus mr-2"></i> Nuevo Servicio
+                    </button>
+                </div>
+
+                <div id="admin-servicios-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Cards populated by JS -->
+                    <div class="text-center py-8 text-gray-400">Cargando servicios...</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal para Servicios -->
+<div id="service-modal"
+    class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-start md:items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-[2rem] md:rounded-[2.5rem] w-full max-w-lg p-6 md:p-8 shadow-2xl relative my-auto">
+        <button onclick="closeServiceModal()" class="absolute top-6 right-6 text-gray-400 hover:text-gray-600">
+            <i class="fas fa-times text-xl"></i>
+        </button>
+
+        <h2 id="service-modal-title" class="text-2xl font-bold text-gray-800 mb-6 font-serif">Nuevo Servicio</h2>
+
+        <form id="service-form" class="space-y-4">
+            <input type="hidden" name="id" id="form-service-id">
+
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1 ml-1">Nombre</label>
+                <input type="text" name="nombre_servicio" required
+                    class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 outline-none focus:border-primary transition-all">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1 ml-1">Precio ($)</label>
+                    <input type="number" name="precio" step="0.01" required
+                        class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 outline-none focus:border-primary transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1 ml-1">Duración (min)</label>
+                    <input type="number" name="duracion_minutos" required
+                        class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 outline-none focus:border-primary transition-all">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1 ml-1">Categoría</label>
+                <select name="categoria" required
+                    class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 outline-none focus:border-primary transition-all cursor-pointer">
+                    <option value="" disabled selected>Selecciona categoría...</option>
+                    <option value="Uñas">💅 Uñas</option>
+                    <option value="Cejas-Pestañas">✨ Cejas-Pestañas</option>
+                    <option value="Pies">👣 Pies</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1 ml-1">Descripción</label>
+                <textarea name="descripcion" rows="3"
+                    class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 outline-none focus:border-primary transition-all"></textarea>
+            </div>
+
+            <button type="submit"
+                class="w-full bg-primary text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all">
+                Guardar Servicio
+            </button>
+        </form>
     </div>
 </div>
 {% endblock %}
@@ -130,7 +209,7 @@
 <script>
     // Tab Switching
     function switchAdminTab(tabName) {
-        ['citas', 'horarios', 'bloqueos', 'users'].forEach(t => {
+        ['citas', 'horarios', 'bloqueos', 'users', 'servicios'].forEach(t => {
             document.getElementById(`tab-${t}`).classList.add('hidden');
             const btn = document.getElementById(`btn-${t}`);
             btn.className = "px-6 py-3 rounded-xl font-bold transition-all text-gray-500 hover:text-primary hover:bg-pink-50";
@@ -143,6 +222,7 @@
         if (tabName === 'horarios') loadHorarios();
         if (tabName === 'bloqueos') loadBloqueos();
         if (tabName === 'users') loadUsers();
+        if (tabName === 'servicios') loadAdminServicios();
     }
 
     // --- CITAS ---
@@ -396,6 +476,133 @@
         await api.put(`/usuarios/${id}/level`, { usr_lvl: newLvl });
         loadUsers();
     }
+
+    // --- SERVICIOS ---
+    const serviceIconMap = {
+        'Uñas': '💅',
+        'Cejas-Pestañas': '✨',
+        'Pies': '👣',
+        'default': '💅'
+    };
+
+    async function loadAdminServicios() {
+        const grid = document.getElementById('admin-servicios-grid');
+        try {
+            const servicios = await api.get('/servicios/');
+            if (servicios.length === 0) {
+                grid.innerHTML = '<div class="col-span-full text-center py-12 text-gray-400">No hay servicios registrados.</div>';
+                return;
+            }
+
+            const categoriasOrden = ['Uñas', 'Cejas-Pestañas', 'Pies'];
+            const grouped = {
+                'Uñas': [],
+                'Cejas-Pestañas': [],
+                'Pies': [],
+                'Otros': []
+            };
+
+            servicios.forEach(s => {
+                if (categoriasOrden.includes(s.categoria)) {
+                    grouped[s.categoria].push(s);
+                } else {
+                    grouped['Otros'].push(s);
+                }
+            });
+
+            let html = '';
+            [...categoriasOrden, 'Otros'].forEach(cat => {
+                const items = grouped[cat];
+                if (items.length === 0) return;
+
+                html += `
+                    <div class="col-span-full mt-6 mb-3">
+                        <h3 class="text-base font-bold text-gray-800 flex items-center gap-2">
+                            <span class="w-8 h-8 bg-pink-50 text-base flex items-center justify-center rounded-lg">${serviceIconMap[cat] || serviceIconMap.default}</span>
+                            <span class="uppercase tracking-wider">${cat}</span>
+                            <div class="h-[1px] flex-1 bg-gray-100"></div>
+                        </h3>
+                    </div>
+                `;
+
+                items.forEach(s => {
+                    const sJson = JSON.stringify(s).replace(/"/g, '&quot;');
+                    html += `
+                        <div onclick="editService(${sJson})" class="bg-gray-50 rounded-2xl p-4 border border-gray-100 flex items-center gap-4 hover:shadow-md transition-all cursor-pointer">
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-bold text-gray-800 text-base truncate">${s.nombre_servicio}</h4>
+                                <div class="flex items-center gap-3 mt-1">
+                                    <span class="text-sm font-bold text-primary">$${s.precio}</span>
+                                    <span class="text-xs text-gray-400"><i class="far fa-clock mr-1"></i>${s.duracion_minutos}m</span>
+                                </div>
+                            </div>
+                            <button onclick="event.stopPropagation(); deleteService(${s.id})" class="w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-red-500 hover:border-red-500 transition-all shrink-0">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+            });
+
+            grid.innerHTML = html;
+        } catch (e) {
+            grid.innerHTML = '<div class="col-span-full text-center py-8 text-red-500">Error cargando servicios</div>';
+        }
+    }
+
+    function openServiceModal() {
+        document.getElementById('service-modal-title').textContent = "Nuevo Servicio";
+        document.getElementById('service-form').reset();
+        document.getElementById('form-service-id').value = "";
+        document.getElementById('service-modal').classList.remove('hidden');
+    }
+
+    function closeServiceModal() {
+        document.getElementById('service-modal').classList.add('hidden');
+    }
+
+    function editService(s) {
+        document.getElementById('service-modal-title').textContent = "Editar Servicio";
+        const form = document.getElementById('service-form');
+        form.id.value = s.id;
+        form.nombre_servicio.value = s.nombre_servicio;
+        form.precio.value = s.precio;
+        form.duracion_minutos.value = s.duracion_minutos;
+        form.categoria.value = s.categoria || "";
+        form.descripcion.value = s.descripcion || "";
+        document.getElementById('service-modal').classList.remove('hidden');
+    }
+
+    async function deleteService(id) {
+        if (!confirm('¿Eliminar este servicio definitivamente?')) return;
+        try {
+            await api.delete(`/servicios/${id}`);
+            loadAdminServicios();
+        } catch (e) { alert(e.message); }
+    }
+
+    document.getElementById('service-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const id = formData.get('id');
+        const data = {
+            nombre_servicio: formData.get('nombre_servicio'),
+            precio: parseFloat(formData.get('precio')),
+            duracion_minutos: parseInt(formData.get('duracion_minutos')),
+            categoria: formData.get('categoria'),
+            descripcion: formData.get('descripcion')
+        };
+
+        try {
+            if (id) {
+                await api.put(`/servicios/${id}`, data);
+            } else {
+                await api.post('/servicios/', data);
+            }
+            closeServiceModal();
+            loadAdminServicios();
+        } catch (e) { alert(e.message); }
+    });
 
     // Init
     document.addEventListener('DOMContentLoaded', () => loadCitas());

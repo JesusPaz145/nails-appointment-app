@@ -34,6 +34,13 @@
         return;
       }
 
+      const categoryEmojiMap = {
+        'Uñas': '💅',
+        'Cejas-Pestañas': '✨',
+        'Pies': '👣',
+        'default': '💅'
+      };
+
       const iconMap = {
         'manos': 'fa-hand-sparkles',
         'pies': 'fa-shoe-prints',
@@ -44,19 +51,23 @@
       };
 
       grid.innerHTML = servicios.map(s => {
+        let emoji = categoryEmojiMap[s.categoria] || null;
         let icon = iconMap.default;
-        const nameLower = s.nombre_servicio.toLowerCase();
-        if (nameLower.includes('manos')) icon = iconMap.manos;
-        else if (nameLower.includes('pies')) icon = iconMap.pies;
-        else if (nameLower.includes('rubber')) icon = iconMap.rubber;
-        else if (nameLower.includes('semi')) icon = iconMap.semi;
+
+        if (!emoji) {
+          const nameLower = s.nombre_servicio.toLowerCase();
+          if (nameLower.includes('manos')) icon = iconMap.manos;
+          else if (nameLower.includes('pies')) icon = iconMap.pies;
+          else if (nameLower.includes('rubber')) icon = iconMap.rubber;
+          else if (nameLower.includes('semi')) icon = iconMap.semi;
+        }
 
         return `
                 <div class="group bg-white rounded-3xl p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:border-primary/20 transition-all duration-300 flex flex-col items-start relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-primary-light to-transparent rounded-bl-full -mr-8 -mt-8 opacity-50 group-hover:scale-150 transition-transform duration-500"></div>
                     
                     <div class="w-14 h-14 bg-primary-light text-primary rounded-2xl flex items-center justify-center text-2xl mb-4 group-hover:rotate-12 transition-transform">
-                        <i class="fas ${icon}"></i>
+                        ${emoji ? `<span>${emoji}</span>` : `<i class="fas ${icon}"></i>`}
                     </div>
                     
                     <h3 class="text-xl font-bold text-gray-800 mb-2 font-serif">${s.nombre_servicio}</h3>

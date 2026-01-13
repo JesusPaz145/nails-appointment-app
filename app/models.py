@@ -27,6 +27,7 @@ class Servicio(Base):
     precio = Column(Numeric)
     duracion_minutos = Column(Integer)
     descripcion = Column(Text)
+    categoria = Column(String, nullable=True) # Cejas, Pestanas, Pies
 
     citas = relationship("Cita", back_populates="servicio")
 

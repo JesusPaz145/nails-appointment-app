@@ -36,6 +36,7 @@ class ServiceBase(BaseModel):
     precio: float
     duracion_minutos: int
     descripcion: Optional[str] = None
+    categoria: Optional[str] = None
 
 class ServiceCreate(ServiceBase):
     pass

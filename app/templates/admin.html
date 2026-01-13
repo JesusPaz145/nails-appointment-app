@@ -55,30 +55,17 @@
                 </button>
             </div>
 
-            <div class="bg-white rounded-[2rem] shadow-lg p-6 border border-gray-100 overflow-x-auto">
+            <div class="bg-white rounded-[2rem] shadow-lg p-6 border border-gray-100">
                 <h2 class="text-2xl font-bold text-gray-800 mb-6 flex justify-between items-center">
                     <span id="citas-title">Citas de Hoy</span>
                     <span id="citas-count" class="text-sm bg-gray-100 text-gray-600 px-3 py-1 rounded-full">0</span>
                 </h2>
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="text-gray-400 border-b border-gray-100">
-                            <th class="py-4 font-normal">ID</th>
-                            <th class="py-4 font-normal">Cliente</th>
-                            <th class="py-4 font-normal">Contacto</th>
-                            <th class="py-4 font-normal">Servicio</th>
-                            <th class="py-4 font-normal">Fecha/Hora</th>
-                            <th class="py-4 font-normal">Estado</th>
-                            <th class="py-4 font-normal">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="citas-table-body" class="text-gray-600">
-                        <!-- Populated by JS -->
-                        <tr>
-                            <td colspan="7" class="text-center py-8">Cargando...</td>
-                        </tr>
-                    </tbody>
-                </table>
+
+                <!-- Container for Cards/Table -->
+                <div id="citas-container" class="space-y-4">
+                    <!-- Cards will be injected here -->
+                    <div class="text-center py-8 text-gray-400">Cargando...</div>
+                </div>
             </div>
         </div>
 
@@ -198,56 +185,100 @@
         }
 
         document.getElementById('citas-count').textContent = filtered.length;
-        renderCitasTable(filtered);
+        renderCitas(filtered);
     }
 
-    function renderCitasTable(citas) {
-        const tbody = document.getElementById('citas-table-body');
+    function renderCitas(citas) {
+        const container = document.getElementById('citas-container');
         if (citas.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-400">No hay citas en esta categoría.</td></tr>';
+            container.innerHTML = '<div class="text-center py-8 text-gray-400">No hay citas en esta categoría.</div>';
             return;
         }
 
-        tbody.innerHTML = citas.map(c => `
-                <tr class="border-b border-gray-50 hover:bg-pink-50/50 transition-colors">
-                    <td class="py-4 font-bold text-primary">#${c.id}</td>
-                    <td class="py-4">${c.cliente_nombre || 'N/A'}</td>
-                    <td class="py-4 text-sm">
-                        ${c.cliente_telefono || '-'}<br>
-                        ${c.cliente_email || '-'}
-                    </td>
-                     <td class="py-4 font-medium">${c.servicio ? c.servicio.nombre_servicio : 'Borrado'}</td>
-                    <td class="py-4">
-                        <span class="font-bold">${new Date(c.fecha_cita + 'T00:00:00').toLocaleDateString()}</span><br>
-                        <span class="text-sm text-gray-400">${c.hora_inicio.substring(0, 5)}</span>
-                    </td>
-                    <td class="py-4">
-                        <span class="px-3 py-1 rounded-full text-xs font-bold 
-                            ${c.estado === 'confirmada' ? 'bg-green-100 text-green-700' :
-                c.estado === 'cancelada' ? 'bg-red-100 text-red-700' :
-                    c.estado === 'completada' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'}">
-                            ${c.estado.toUpperCase()}
-                        </span>
-                    </td>
-                    <td class="py-4">
-                        <div class="flex gap-2">
-                             ${c.estado === 'pendiente' ? `
-                                <button onclick="updateStatus(${c.id}, 'confirmada')" class="p-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 border border-green-200" title="Aceptar"><i class="fas fa-check"></i></button>
-                                <button onclick="updateStatus(${c.id}, 'cancelada')" class="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 border border-red-200" title="Rechazar"><i class="fas fa-times"></i></button>
-                            ` : ''}
+        container.innerHTML = citas.map(c => {
+            const dateObj = new Date(c.fecha_cita + 'T00:00:00');
+            const dateStr = dateObj.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+            const whatsappLink = c.cliente_telefono ? `https://wa.me/${c.cliente_telefono.replace(/\D/g, '')}` : '#';
 
-                            ${c.estado === 'confirmada' ? `
-                                <button onclick="updateStatus(${c.id}, 'completada')" class="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 border border-blue-200" title="Marcar como Completada"><i class="fas fa-check-double"></i></button>
-                                <button onclick="updateStatus(${c.id}, 'cancelada')" class="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 border border-red-200" title="Cancelar"><i class="fas fa-ban"></i></button>
-                            ` : ''}
-
-                            ${c.estado === 'cancelada' || c.estado === 'completada' ? `
-                                <span class="text-gray-300">-</span>
-                            ` : ''}
+            return `
+                <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 transition-all hover:shadow-md">
+                    <!-- Header: Top info -->
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h3 class="font-bold text-gray-800 text-lg">${c.cliente_nombre || 'Cliente'}</h3>
+                            <p class="text-primary font-medium text-sm flex items-center gap-2">
+                                <i class="fas fa-magic text-xs"></i> ${c.servicio ? c.servicio.nombre_servicio : 'Borrado'}
+                            </p>
                         </div>
-                    </td>
-                </tr>
-            `).join('');
+                        <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider
+                            ${c.estado === 'confirmada' ? 'bg-green-100 text-green-700' :
+                    c.estado === 'cancelada' ? 'bg-red-100 text-red-700' :
+                        c.estado === 'completada' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'}">
+                            ${c.estado}
+                        </span>
+                    </div>
+
+                    <!-- Body: Appointment details -->
+                    <div class="flex items-center justify-between text-sm text-gray-500 mb-4 bg-white/50 p-3 rounded-xl border border-white">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-pink-100 text-primary w-10 h-10 rounded-lg flex flex-col items-center justify-center font-bold">
+                                <span class="text-[10px] uppercase leading-none">${dateStr.split(' ')[0]}</span>
+                                <span class="text-sm leading-none">${dateStr.split(' ')[1]}</span>
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-700">${dateStr}</p>
+                                <p class="text-xs italic">${c.hora_inicio.substring(0, 5)} hs</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-2">
+                            ${c.cliente_telefono ? `
+                                <a href="${whatsappLink}" target="_blank" class="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform" title="WhatsApp">
+                                    <i class="fab fa-whatsapp text-xl"></i>
+                                </a>
+                            ` : ''}
+                            <button onclick="toggleDetails(${c.id})" class="w-10 h-10 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors" title="Detalles">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Hidden Details Section -->
+                    <div id="details-${c.id}" class="hidden mt-3 pt-3 border-t border-dashed border-gray-200 text-xs text-gray-500 space-y-1">
+                        <p><strong>ID Cita:</strong> #${c.id}</p>
+                        <p><strong>Email:</strong> ${c.cliente_email || '-'}</p>
+                        <p><strong>Teléfono:</strong> ${c.cliente_telefono || '-'}</p>
+                        ${c.notas ? `<p><strong>Notas:</strong> ${c.notas}</p>` : ''}
+                    </div>
+
+                    <!-- Footer: Actions -->
+                    <div class="flex gap-2 justify-end mt-2">
+                         ${c.estado === 'pendiente' ? `
+                            <button onclick="updateStatus(${c.id}, 'confirmada')" class="flex-1 py-2 bg-green-500 text-white rounded-xl font-bold text-sm shadow-sm hover:bg-green-600 transition-colors">
+                                <i class="fas fa-check mr-1"></i> Aprobar
+                            </button>
+                            <button onclick="updateStatus(${c.id}, 'cancelada')" class="flex-1 py-2 bg-gray-100 text-gray-500 rounded-xl font-bold text-sm hover:bg-red-50 hover:text-red-500 transition-colors">
+                                <i class="fas fa-times mr-1"></i> Rechazar
+                            </button>
+                        ` : ''}
+
+                        ${c.estado === 'confirmada' ? `
+                            <button onclick="updateStatus(${c.id}, 'completada')" class="flex-1 py-2 bg-blue-500 text-white rounded-xl font-bold text-sm shadow-sm hover:bg-blue-600 transition-colors">
+                                <i class="fas fa-calendar-check mr-1"></i> Finalizar
+                            </button>
+                            <button onclick="updateStatus(${c.id}, 'cancelada')" class="px-4 py-2 bg-red-50 text-red-400 rounded-xl font-medium text-sm hover:bg-red-100 transition-colors">
+                                <i class="fas fa-ban"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function toggleDetails(id) {
+        const el = document.getElementById(`details-${id}`);
+        el.classList.toggle('hidden');
     }
 
     async function updateStatus(id, newStatus) {

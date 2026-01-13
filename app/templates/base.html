@@ -74,20 +74,6 @@
                     </li>
                 </ul>
             </nav>
-
-            <!-- Mobile Nav Dropdown (Hidden via JS initially) -->
-            <div id="mobile-menu"
-                class="fixed inset-0 bg-white z-[60] transform translate-x-full transition-transform duration-300 ease-in-out md:hidden flex flex-col pt-20 px-6 gap-6 shadow-2xl">
-                <button id="close-menu" class="absolute top-4 right-4 text-3xl text-gray-500 hover:text-primary">
-                    <i class="fas fa-times"></i>
-                </button>
-                <a href="/" class="text-xl font-medium border-b border-gray-100 pb-2">Inicio</a>
-                <a href="/servicios" class="text-xl font-medium border-b border-gray-100 pb-2">Servicios</a>
-                <div id="mobile-auth-container" class="mt-4">
-                    <a href="/login"
-                        class="block w-full text-center bg-primary text-white py-3 rounded-xl font-bold text-lg shadow-md">Login</a>
-                </div>
-            </div>
         </div>
     </header>
 
@@ -103,75 +89,135 @@
 
     <script src="/static/js/api.js"></script>
     <script>
-        // Mobile Menu Logic
-        const menuToggle = document.getElementById('menu-toggle');
-        const closeMenu = document.getElementById('close-menu');
-        const mobileMenu = document.getElementById('mobile-menu');
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mobile Menu Logic
+            const menuToggle = document.getElementById('menu-toggle');
+            const closeMenu = document.getElementById('close-menu');
+            const mobileMenu = document.getElementById('mobile-menu');
 
-        function toggleMenu() {
-            mobileMenu.classList.toggle('translate-x-full');
-            document.body.classList.toggle('overflow-hidden');
-        }
+            function toggleMenu() {
+                mobileMenu.classList.toggle('translate-x-full');
+                document.body.classList.toggle('overflow-hidden');
+            }
 
-        if (menuToggle) menuToggle.addEventListener('click', toggleMenu);
-        if (closeMenu) closeMenu.addEventListener('click', toggleMenu);
+            if (menuToggle) menuToggle.addEventListener('click', toggleMenu);
+            if (closeMenu) closeMenu.addEventListener('click', toggleMenu);
 
-        // Active Link Highlight
-        const path = window.location.pathname;
-        if (path === '/' || path === '/index.html') {
-            document.getElementById('nav-home').classList.add('text-primary', 'bg-primary-light');
-        } else if (path.startsWith('/servicios')) {
-            document.getElementById('nav-services').classList.add('text-primary', 'bg-primary-light');
-        }
+            // Active Link Highlight
+            const path = window.location.pathname;
+            if (path === '/' || path === '/index.html') {
+                const homeLink = document.getElementById('nav-home');
+                if (homeLink) homeLink.classList.add('text-primary', 'bg-primary-light');
+            } else if (path.startsWith('/servicios')) {
+                const servicesLink = document.getElementById('nav-services');
+                if (servicesLink) servicesLink.classList.add('text-primary', 'bg-primary-light');
+            }
 
-        // Auth Logic
-        async function checkAuth() {
-            try {
-                const res = await fetch('/api/auth/me');
-                if (res.ok) {
-                    const user = await res.json();
+            // Auth Logic
+            async function checkAuth() {
+                try {
+                    const res = await fetch('/api/auth/me');
+                    if (res.ok) {
+                        const user = await res.json();
 
-                    // Desktop Update
-                    const authLink = document.getElementById('auth-link');
-                    const navUl = document.querySelector('nav ul');
-                    if (authLink) {
-                        // Insert Mis Citas
-                        const li = document.createElement('li');
-                        li.innerHTML = '<a href="/mis-citas" class="px-4 py-2 rounded-full hover:bg-primary-light hover:text-primary transition-colors font-medium">Mis Citas</a>';
-                        navUl.insertBefore(li, authLink);
+                        // Desktop Update
+                        const authLink = document.getElementById('auth-link');
+                        const navUl = document.querySelector('nav ul');
+                        if (authLink) {
+                            // Insert Mis Citas
+                            const li = document.createElement('li');
+                            li.innerHTML = '<a href="/mis-citas" class="px-4 py-2 rounded-full hover:bg-primary-light hover:text-primary transition-colors font-medium">Mis Citas</a>';
+                            navUl.insertBefore(li, authLink);
 
-                        if (user.usr_lvl === 1) {
-                            const adminLi = document.createElement('li');
-                            adminLi.innerHTML = '<a href="/admin" class="px-4 py-2 rounded-full hover:bg-primary-light hover:text-primary transition-colors font-medium">Admin</a>';
-                            navUl.insertBefore(adminLi, authLink);
+                            if (user.usr_lvl === 1) {
+                                const adminLi = document.createElement('li');
+                                adminLi.innerHTML = '<a href="/admin" class="px-4 py-2 rounded-full hover:bg-primary-light hover:text-primary transition-colors font-medium">Admin</a>';
+                                navUl.insertBefore(adminLi, authLink);
+                            }
+
+                            authLink.innerHTML = '<button id="logout-btn" class="text-gray-600 hover:text-primary font-medium px-4">Logout</button>';
+                            document.getElementById('logout-btn').addEventListener('click', async () => {
+                                await fetch('/api/auth/logout', { method: 'POST' });
+                                window.location.href = '/';
+                            });
                         }
 
-                        authLink.innerHTML = '<button id="logout-btn" class="text-gray-600 hover:text-primary font-medium px-4">Logout</button>';
-                        document.getElementById('logout-btn').addEventListener('click', async () => {
-                            await fetch('/api/auth/logout', { method: 'POST' });
-                            window.location.href = '/';
-                        });
-                    }
+                        // Mobile Update
+                        const mobileAuth = document.getElementById('mobile-auth-container');
+                        if (mobileAuth) {
+                            let mobileLinks = `
+                                <a href="/mis-citas" class="text-2xl font-bold text-gray-800 py-4 px-6 rounded-2xl hover:bg-pink-50 transition-colors flex items-center gap-4">
+                                    <i class="fas fa-calendar-alt text-gray-300 w-8"></i> Mis Citas
+                                </a>
+                            `;
+                            if (user.usr_lvl === 1) {
+                                mobileLinks += `
+                                    <a href="/admin" class="text-2xl font-bold text-gray-800 py-4 px-6 rounded-2xl hover:bg-pink-50 transition-colors flex items-center gap-4">
+                                        <i class="fas fa-user-shield text-gray-300 w-8"></i> Admin Panel
+                                    </a>
+                                `;
+                            }
+                            mobileAuth.innerHTML = mobileLinks + `
+                                <button id="mobile-logout" class="mt-8 w-full text-center border-2 border-red-50 text-red-400 py-4 rounded-2xl font-bold text-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition-all shadow-sm">
+                                    <i class="fas fa-sign-out-alt mr-2"></i> Cerrar Sesión
+                                </button>
+                            `;
 
-                    // Mobile Update
-                    const mobileAuth = document.getElementById('mobile-auth-container');
-                    let mobileLinks = '<a href="/mis-citas" class="text-xl font-medium border-b border-gray-100 pb-2 block mb-4">Mis Citas</a>';
-                    if (user.usr_lvl === 1) {
-                        mobileLinks += '<a href="/admin" class="text-xl font-medium border-b border-gray-100 pb-2 block mb-4">Admin</a>';
+                            document.getElementById('mobile-logout').addEventListener('click', async () => {
+                                await fetch('/api/auth/logout', { method: 'POST' });
+                                window.location.href = '/';
+                            });
+                        }
                     }
-                    mobileAuth.innerHTML = mobileLinks + '<button id="mobile-logout" class="block w-full text-center border-2 border-primary text-primary py-3 rounded-xl font-bold text-lg">Logout</button>';
-
-                    document.getElementById('mobile-logout').addEventListener('click', async () => {
-                        await fetch('/api/auth/logout', { method: 'POST' });
-                        window.location.href = '/';
-                    });
+                } catch (e) {
+                    console.log("Not logged in");
                 }
-            } catch (e) {
-                console.log("Not logged in");
             }
-        }
-        checkAuth();
+            checkAuth();
+        });
     </script>
+
+    <!-- Mobile Nav Dropdown (Moved to bottom of body to avoid stacking context issues) -->
+    <div id="mobile-menu"
+        class="fixed inset-0 bg-white z-[9999] transform translate-x-full transition-transform duration-300 ease-in-out md:hidden flex flex-col p-0 shadow-2xl">
+        <!-- Solid Header for Menu -->
+        <div class="flex justify-between items-center p-6 border-b border-gray-100 bg-white">
+            <span class="text-xl font-serif font-bold text-primary">Nails by Anais</span>
+            <button id="close-menu" class="text-3xl text-gray-400 hover:text-primary p-2">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Scrollable Body with Solid BG -->
+        <div class="flex-1 overflow-y-auto px-6 py-8 bg-white">
+            <nav class="flex flex-col gap-2">
+                <a href="/"
+                    class="text-2xl font-bold text-gray-800 py-4 px-6 rounded-2xl hover:bg-pink-50 transition-colors flex items-center gap-4">
+                    <i class="fas fa-home text-gray-300 w-8"></i> Inicio
+                </a>
+                <a href="/servicios"
+                    class="text-2xl font-bold text-gray-800 py-4 px-6 rounded-2xl hover:bg-pink-50 transition-colors flex items-center gap-4">
+                    <i class="fas fa-magic text-gray-300 w-8"></i> Servicios
+                </a>
+                <div id="mobile-auth-container" class="flex flex-col gap-2 mt-4">
+                    <!-- Injected by Auth JS -->
+                    <a href="/login"
+                        class="w-full text-center bg-primary text-white py-5 rounded-2xl font-bold text-xl shadow-lg shadow-primary/20">
+                        <i class="fas fa-sign-in-alt mr-2"></i> Iniciar Sesión
+                    </a>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Footer with Info -->
+        <div class="p-8 text-center text-gray-400 text-sm border-t border-gray-50 bg-gray-50/50">
+            <p class="font-bold flex justify-center items-center gap-2 mb-1">
+                <span class="w-2 h-2 bg-green-500 rounded-full"></span> Abierto ahora
+            </p>
+            <p>Elegancia en cada detalle</p>
+        </div>
+    </div>
+
     {% block scripts %}{% endblock %}
 </body>
 

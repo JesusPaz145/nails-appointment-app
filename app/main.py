@@ -4,16 +4,25 @@ from fastapi.middleware.cors import CORSMiddleware
 from .database import engine, Base
 from .routers import auth, servicios, citas, horarios, pages, users, configuracion
 from contextlib import asynccontextmanager
+import asyncio
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Create tables if they don't exist
-    try:
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-    except Exception as e:
-        print(f"Database connection failed: {e}")
-        raise e
+    retries = 5
+    while retries > 0:
+        try:
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+            print("Database connected and tables created successfully.")
+            break
+        except Exception as e:
+            print(f"Database connection failed: {e}")
+            retries -= 1
+            if retries == 0:
+                raise e
+            print(f"Retrying in 5 seconds... ({retries} attempts left)")
+            await asyncio.sleep(5)
     yield
 
 app = FastAPI(lifespan=lifespan, title="Nails by Anais API")

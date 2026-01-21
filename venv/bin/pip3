@@ -1,4 +1,4 @@
-#!/home/linuxmintjp/Documents/GitHub/nails-appointment-app/venv/bin/python3
+#!/home/jesuspaz145/Documents/GitHub/nails-appointment-app/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys

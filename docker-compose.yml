@@ -1,31 +1,30 @@
 version: '3.8'
 
 services:
-  # Web Service (Python app)
   web:
     build: .
-    container_name: nails_web
+    command: python run.py
+    ports:
+      - "5000:5000"
+    environment:
+      # Estas variables SOBRESCRIBEN los valores de app/database.py
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=admin
+      - DB_PASS=Yisus78_Secure!db26
+      - DB_NAME=nailsbyanais
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
     restart: always
     environment:
-      # These will override or provide defaults if they exist in the environment/UI
-      - DB_HOST=${DB_HOST:-192.168.4.175}
-      - DB_PORT=${DB_PORT:-5433}
-      - DB_USER=${DB_USER}
-      - DB_PASS=${DB_PASS}
-      - DB_NAME=${DB_NAME}
-      - SECRET_KEY=${SECRET_KEY}
-      - PYTHONDONTWRITEBYTECODE=1
-    ports:
-      - "${APP_PORT:-4321}:8000"
-    extra_hosts:
-      - "host.docker.internal:host-gateway" # Required for Linux to reach host
-    networks:
-      - nails_net
-      #volumes:
-      #- ./app:/app/app # Sync code for development (Commented for Prod/Stability)
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=Yisus78_Secure!db26
+      - POSTGRES_DB=nailsbyanais
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
-      # Removed 'db' service as user provides their own
-
-networks:
-  nails_net:
-    driver: bridge
+volumes:
+  postgres_data:

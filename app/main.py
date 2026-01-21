@@ -8,8 +8,12 @@ from contextlib import asynccontextmanager
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Create tables if they don't exist
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+    except Exception as e:
+        print(f"Database connection failed: {e}")
+        raise e
     yield
 
 app = FastAPI(lifespan=lifespan, title="Nails by Anais API")
@@ -35,4 +39,3 @@ app.include_router(pages.router)
 # Serve Static Files (Frontend) using standard HTML
 # We mount /static for assets
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
-

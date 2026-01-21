@@ -7,9 +7,9 @@ load_dotenv()
 
 # Build DB URL from env vars
 DB_USER = os.getenv("DB_USER", "admin")
-DB_PASS = os.getenv("DB_PASS", "admin123")
-DB_HOST = os.getenv("DB_HOST", "localhost")
-DB_PORT = os.getenv("DB_PORT", "5432")
+DB_PASS = os.getenv("DB_PASS", "Yisus78_Secure!db26")
+DB_HOST = os.getenv("DB_HOST", "192.168.4.175")
+DB_PORT = os.getenv("DB_PORT", "5433")
 DB_NAME = os.getenv("DB_NAME", "nailsbyanais")
 
 import urllib.parse

@@ -6,17 +6,23 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Build DB URL from env vars
-DB_USER = os.getenv("DB_USER", "admin")
-DB_PASS = os.getenv("DB_PASS", "Yisus78_Secure!db26")
-DB_HOST = os.getenv("DB_HOST", "192.168.4.175")
-DB_PORT = os.getenv("DB_PORT", "5433")
-DB_NAME = os.getenv("DB_NAME", "nailsbyanais")
+DB_USER = os.getenv("DB_USER")
+DB_PASS = os.getenv("DB_PASS")
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT")
+DB_NAME = os.getenv("DB_NAME")
+
+if not all([DB_USER, DB_HOST, DB_PORT, DB_NAME]):
+    # Note: DB_PASS might be empty in some local configs, but usually required in prod.
+    # Adjust logic if empty password is allowed.
+    print("Warning: Some database environment variables are missing.")
 
 import urllib.parse
 
 encoded_user = urllib.parse.quote_plus(DB_USER)
 encoded_pass = urllib.parse.quote_plus(DB_PASS)
 
+# AsyncPG URL
 # AsyncPG URL
 DATABASE_URL = f"postgresql+asyncpg://{encoded_user}:{encoded_pass}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 

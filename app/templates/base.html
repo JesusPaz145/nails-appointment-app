@@ -50,9 +50,10 @@
 <body class="text-gray-800">
     <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm">
         <div class="container mx-auto px-4 py-4 flex justify-between items-center relative">
-            <a href="/"
-                class="text-2xl font-bold text-primary flex items-center gap-2 font-serif hover:scale-105 transition-transform">
-                <img src="/static/images/logo unas.png" alt="Nails by Anais" class="h-12 w-auto object-contain">
+            <a href="/" class="flex items-center gap-3 font-serif hover:scale-105 transition-transform">
+                <img src="/static/images/logo unas.png" alt="Nails by Anais"
+                    class="h-16 md:h-20 w-auto object-contain drop-shadow-sm">
+                <span class="text-2xl font-bold text-primary hidden sm:block">Nails by Anais</span>
             </a>
 
             <!-- Mobile Menu Button -->
@@ -180,9 +181,11 @@
     <!-- Mobile Nav Dropdown (Moved to bottom of body to avoid stacking context issues) -->
     <div id="mobile-menu"
         class="fixed inset-0 bg-white z-[9999] transform translate-x-full transition-transform duration-300 ease-in-out md:hidden flex flex-col p-0 shadow-2xl">
-        <!-- Solid Header for Menu -->
         <div class="flex justify-between items-center p-6 border-b border-gray-100 bg-white">
-            <img src="/static/images/logo unas.png" alt="Nails by Anais" class="h-8 w-auto object-contain">
+            <div class="flex items-center gap-3">
+                <img src="/static/images/logo unas.png" alt="Nails by Anais" class="h-12 w-auto object-contain">
+                <span class="text-xl font-serif font-bold text-primary">Nails by Anais</span>
+            </div>
             <button id="close-menu" class="text-3xl text-gray-400 hover:text-primary p-2">
                 <i class="fas fa-times"></i>
             </button>

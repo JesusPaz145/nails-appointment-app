@@ -7,24 +7,10 @@ services:
     ports:
       - "5000:5000"
     environment:
-      # Estas variables SOBRESCRIBEN los valores de app/database.py
-      - DB_HOST=db
-      - DB_PORT=5432
+      # Conexión a Base de Datos Externa (192.168.4.175)
+      - DB_HOST=192.168.4.175
+      - DB_PORT=5433
       - DB_USER=admin
       - DB_PASS=Yisus78_Secure!db26
       - DB_NAME=nailsbyanais
-    depends_on:
-      - db
-
-  db:
-    image: postgres:15
-    restart: always
-    environment:
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=Yisus78_Secure!db26
-      - POSTGRES_DB=nailsbyanais
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
+    # No depends_on, as DB is external
